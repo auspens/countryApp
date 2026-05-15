@@ -1,6 +1,9 @@
 package com.sumup.countryapp.repository
 
 import com.sumup.countryapp.datamodels.CountryResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
 
 
 class CountryRepositoryImpl(
@@ -36,19 +39,21 @@ class CountryRepositoryImpl(
 
     override suspend fun getCountryByName(countryName: String) : Result<CountryResponse>{
         try {
-            val response = countryAppApi.getCountryByName(countryName)
-            if (response.isSuccessful) {
-                val countryResponse = response.body()
-                return if (countryResponse != null) {
-                    Result.success(countryResponse[0])
+            val response = withContext(Dispatchers.IO) {
+                countryAppApi.getCountryByName(countryName)}
+                if (response.isSuccessful) {
+                    val countryResponse = response.body()
+                    return if (countryResponse != null) {
+                        Result.success(countryResponse[0])
+                    } else {
+                        Result.failure(Exception("Empty response body"))
+                    }
                 } else {
-                    Result.failure(Exception("Empty response body"))
+                    return Result.failure(Exception("Error fetching country: ${response.code()} ${response.message()}"))
                 }
-            } else {
-                return Result.failure(Exception("Error fetching country: ${response.code()} ${response.message()}"))
+            } catch (e: Exception) {
+                return Result.failure(e)
             }
-        } catch (e: Exception) {
-            return Result.failure(e)
-        }
+
     }
 }
