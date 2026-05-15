@@ -27,6 +27,6 @@ class CountryRepositoryImplTest {
         val result = repository.getCountryByName("USA")
 
         assertTrue(result.isSuccess)
-        assertEquals(country, result.getOrNull()?.get(0))
+        assertEquals(country, result.getOrNull())
     }
 }

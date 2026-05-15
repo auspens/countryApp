@@ -13,38 +13,10 @@ import javax.inject.Inject
 class CountryViewModel @Inject constructor(
     private val repository: CountryRepository
 ) : ViewModel() {
-    private var country: CountryResponse? = null
 
     fun getCountryByName(countryName: String) {
-        viewModelScope.launch{
-            country = repository.getCountryByName(countryName).getOrNull()?.get(0)
+        viewModelScope.launch {
+            val country = repository.getCountryByName(countryName).getOrNull()
         }
-    }
-    fun getCountryName(): String? {
-        return country?.name?.common
-    }
-    fun getCountryCapital(): String? {
-        return country?.capital?.firstOrNull()
-    }
-    fun getCountryPopulation(): Long? {
-        return country?.population
-    }
-    fun getCountryRegion(): String? {
-        return country?.region
-    }
-    fun getCountrySubRegion(): String? {
-        return country?.subregion
-    }
-    fun getCountryFlagUrl(): String? {
-        return country?.flags?.png
-    }
-    fun getCountryLanguages(): List<String>? {
-        return country?.languages?.values?.toList()
-    }
-    fun getCountryCurrencies(): List<String?>? {
-        return country?.currencies?.values?.map { it.name }?.toList()
-    }
-    fun getCountryGoogleMapsUrl(): String? {
-        return country?.maps?.googleMaps
     }
 }

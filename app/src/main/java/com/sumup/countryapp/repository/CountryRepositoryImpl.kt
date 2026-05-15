@@ -6,45 +6,49 @@ import com.sumup.countryapp.datamodels.CountryResponse
 class CountryRepositoryImpl(
     val countryAppApi: com.sumup.countryapp.api.CountryAppApi
 ) : CountryRepository {
-    override suspend fun getCountriesByRegion(regionName: String) {
+    override suspend fun getCountriesByRegion(regionName: String):Result<List<CountryResponse>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCountriesBySubRegion(subRegionName: String) {
+    override suspend fun getCountriesBySubRegion(subRegionName: String):Result<List<CountryResponse>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCountriesByCapital(capitalName: String) {
+    override suspend fun getCountriesByCapital(capitalName: String):Result<List<CountryResponse>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCountriesByCurrency(currencyName: String) {
+    override suspend fun getCountriesByCurrency(currencyName: String):Result<List<CountryResponse>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCountriesByLanguage(languageName: String) {
+    override suspend fun getCountriesByLanguage(languageName: String):Result<List<CountryResponse>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCountryByCode(countryCode: String) {
+    override suspend fun getCountryByCode(countryCode: String):Result<List<CountryResponse>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCountriesByIndependence(independenceStatus: Boolean) {
+    override suspend fun getCountriesByIndependence(independenceStatus: Boolean):Result<List<CountryResponse>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCountryByName(countryName: String) : Result<List<CountryResponse>>{
-        val response = countryAppApi.getCountryByName(countryName)
-        if(response.isSuccessful){
-            val countryResponse = response.body()
-            return if(countryResponse != null){
-                Result.success(countryResponse)
+    override suspend fun getCountryByName(countryName: String) : Result<CountryResponse>{
+        try {
+            val response = countryAppApi.getCountryByName(countryName)
+            if (response.isSuccessful) {
+                val countryResponse = response.body()
+                return if (countryResponse != null) {
+                    Result.success(countryResponse[0])
+                } else {
+                    Result.failure(Exception("Empty response body"))
+                }
             } else {
-                Result.failure(Exception("Empty response body"))
+                return Result.failure(Exception("Error fetching country: ${response.code()} ${response.message()}"))
             }
-        } else {
-            return Result.failure(Exception("Error fetching country: ${response.code()} ${response.message()}"))
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
     }
 }
