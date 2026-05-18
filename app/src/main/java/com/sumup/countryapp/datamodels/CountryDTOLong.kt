@@ -1,8 +1,7 @@
 package com.sumup.countryapp.datamodels
 
-import com.google.gson.annotations.SerializedName
+data class CountryDTOLong(
 
-data class CountryResponse(
 //    @SerializedName("tld") val tld: List<String>? = null,
     val cca2: String? = null,
 //    @SerializedName("ccn3") val ccn3: String? = null,
@@ -126,3 +125,4 @@ data class PostalCodeDto(
     val format: String? = null,
     val regex: String? = null
 )
+

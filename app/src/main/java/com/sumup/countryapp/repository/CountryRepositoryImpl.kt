@@ -1,59 +1,58 @@
 package com.sumup.countryapp.repository
 
-import com.sumup.countryapp.datamodels.CountryResponse
+import com.sumup.countryapp.datamodels.CountryDTOShort
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
+import kotlin.String
+import kotlin.collections.mutableSetOf
 
 
 class CountryRepositoryImpl(
     val countryAppApi: com.sumup.countryapp.api.CountryAppApi
 ) : CountryRepository {
-    override suspend fun getCountriesByRegion(regionName: String):Result<List<CountryResponse>> {
-        TODO("Not yet implemented")
-    }
+    private var _countries = MutableStateFlow<List<CountryDTOShort>>(emptyList())
+    private var _regions = MutableStateFlow<List<String>>(emptyList())
 
-    override suspend fun getCountriesBySubRegion(subRegionName: String):Result<List<CountryResponse>> {
-        TODO("Not yet implemented")
-    }
+    override val countries: StateFlow<List<CountryDTOShort>> = _countries
 
-    override suspend fun getCountriesByCapital(capitalName: String):Result<List<CountryResponse>> {
-        TODO("Not yet implemented")
-    }
+    override val regions: StateFlow<List<String>> = _regions
 
-    override suspend fun getCountriesByCurrency(currencyName: String):Result<List<CountryResponse>> {
-        TODO("Not yet implemented")
-    }
+    override fun initRegions() {
 
-    override suspend fun getCountriesByLanguage(languageName: String):Result<List<CountryResponse>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getCountryByCode(countryCode: String):Result<List<CountryResponse>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getCountriesByIndependence(independenceStatus: Boolean):Result<List<CountryResponse>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getCountryByName(countryName: String) : Result<CountryResponse>{
-        try {
-            val response = withContext(Dispatchers.IO) {
-                countryAppApi.getCountryByName(countryName)}
-                if (response.isSuccessful) {
-                    val countryResponse = response.body()
-                    return if (countryResponse != null) {
-                        Result.success(countryResponse[0])
-                    } else {
-                        Result.failure(Exception("Empty response body"))
-                    }
-                } else {
-                    return Result.failure(Exception("Error fetching country: ${response.code()} ${response.message()}"))
+        val setOfRegions = mutableSetOf<String>()
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
+        coroutineScope.launch {
+            runCatching {
+                val response = withContext(Dispatchers.IO) {
+                    countryAppApi.getCountries("region")
                 }
-            } catch (e: Exception) {
-                return Result.failure(e)
+                if (response.isSuccessful) {
+                    response.body()
+                        ?.mapNotNull { response -> response.region?.let { setOfRegions.add(it) } }
+                }
             }
+        }
+        _regions.value = setOfRegions.toList()
+    }
 
+
+    override suspend fun initCountries(fields: List<String>) {
+        val response = withContext(Dispatchers.IO) {
+            countryAppApi.getCountries(fields.joinToString(","))
+        }
+        if (response.isSuccessful) {
+            val countryResponse = response.body()
+            if (countryResponse != null) {
+                _countries.value = countryResponse
+            } else {
+                throw (Exception("Empty response body"))
+            }
+        } else {
+            throw (Exception("Error fetching countries: ${response.code()} ${response.message()}"))
+        }
     }
 }
