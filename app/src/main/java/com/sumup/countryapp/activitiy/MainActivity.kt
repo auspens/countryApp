@@ -9,17 +9,23 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -73,7 +79,9 @@ class MainActivity : ComponentActivity() {
 private fun CountriesList(viewModel: CountryViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Countries") }) },
+        topBar = {
+            TopAppBar()
+        },
         modifier = Modifier.padding(5.dp)
     ) { padding ->
         when (state) {
@@ -84,24 +92,60 @@ private fun CountriesList(viewModel: CountryViewModel) {
                     )
                 }
             }
-
             is HomeUiState.Loading -> CircularProgressIndicator()
             else -> Text(text = "Error loading countries list")
-
-
         }
-
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TopAppBar(){
+    TopAppBar(
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            )
+            {
+                Icon(
+                    painter = painterResource(R.drawable.ic_globe),
+                    tint = Color(0xFF24389C),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                )
+                Text(
+                    "WorldAtlas", style = typography.titleLarge,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton({},
+                    modifier = Modifier
+                        .padding(8.dp)
+                ){
+                    Icon(
+                        painter = painterResource(R.drawable.ic_search),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(18.dp),
+                        tint = Color(0xFF454652)
+                    )
+                }
+            }
+        },
+    )
 }
 
 @Composable
 private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier) {
-   OutlinedCard(modifier = modifier
-       .fillMaxWidth()
-       .clickable(onClick = {})
-       .padding(5.dp)
-     ) {
-        Row(verticalAlignment = Alignment.CenterVertically,
+    OutlinedCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = {})
+            .padding(5.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(4f)
@@ -126,15 +170,18 @@ private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier)
                     .weight(1f),
 //                contentScale = ContentScale.Crop,
             )
-            Column(modifier = Modifier
-                .padding(4.dp)
-                .weight(2f)) {
+            Column(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .weight(2f)
+            ) {
                 Text(text = country.name?.common ?: "Unknown", fontSize = 24.sp)
                 Text(text = country.region ?: "Unknown")
             }
-            Icon(painter = painterResource(R.drawable.ic_star_outlined),
+            Icon(
+                painter = painterResource(R.drawable.ic_star_outlined),
                 contentDescription = null,
-                tint= fontGray,
+                tint = fontGray,
                 modifier = Modifier.padding(end = 20.dp)
             )
         }
@@ -142,11 +189,14 @@ private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier)
 
 }
 
-@Preview (showBackground = true)
+@Preview(showBackground = true)
 @Composable
-fun CountryItemPreview(){
-    val country = CountryDTOShort(region = "Europe", name = NameDto(common = "Germany", official = "Federal Republic of Germany"),
-        flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"))
+fun CountryItemPreview() {
+    val country = CountryDTOShort(
+        region = "Europe",
+        name = NameDto(common = "Germany", official = "Federal Republic of Germany"),
+        flags = FlagsDto(png = "https://flagcdn.com/w320/de.png")
+    )
     MyApplicationTheme {
         CountryItem(country)
     }

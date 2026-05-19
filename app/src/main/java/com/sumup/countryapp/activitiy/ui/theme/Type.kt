@@ -2,6 +2,7 @@ package com.sumup.countryapp.activitiy.ui.theme
 
 import com.sumup.countryapp.R
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -27,7 +28,7 @@ val fontFamilyRoboto = FontFamily(
     )
 )
 
-val fontFamilySans = FontFamily(
+val fontFamilyNoto = FontFamily(
     Font(
         googleFont = GoogleFont("Noto Sans"),
         fontProvider = provider,
@@ -44,11 +45,12 @@ val Typography = Typography(
         color = fontGray
     ),
     titleLarge = TextStyle(
-        fontFamily = fontFamilySans,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp,
-        color = fontBlack
+        fontFamily = fontFamilyNoto,
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
+        color = Color(0xFF24389C),
+        fontStyle = FontStyle.Normal,
+        fontWeight = FontWeight(700)
     ),
     labelSmall = TextStyle(
         fontFamily = fontFamilyRoboto,
