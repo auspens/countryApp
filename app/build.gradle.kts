@@ -88,4 +88,6 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.androidx.compose.material.icons.core)
 }

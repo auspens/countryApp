@@ -28,9 +28,12 @@ retrofitVersion = "2.11.0"
 navigationFragmentKtx = "2.6.0"
 navigationUiKtx = "2.6.0"
 runtime = "1.11.1"
+uiTextGoogleFonts = "1.11.1"
 uiUnit = "1.11.1"
 
 [libraries]
+androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
+androidx-compose-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "hiltLifecycleViewmodelCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
