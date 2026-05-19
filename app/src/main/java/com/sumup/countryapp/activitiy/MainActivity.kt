@@ -1,11 +1,13 @@
 package com.sumup.countryapp.activitiy
 
 
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,7 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -149,6 +155,28 @@ private fun TopAppBar(){
 }
 
 @Composable
+private fun ErrorScreen(){
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(16.dp)) {
+        Image(painter = painterResource(R.drawable.ic_error),
+            contentDescription = null,
+            Modifier.padding(16.dp)
+                .size(128.dp))
+        Text("Something went wrong", style = typography.bodyLarge)
+        Text("We couldn't load the country list.\n" +
+                "Please check your connection and\n" +
+                "try again.", style = typography.bodySmall)
+        Button(onClick = {}, content = {
+            Icon(Icons.Outlined.Refresh, contentDescription = null)
+            Text("Retry", color = Color(0xFFFFFFFF),)
+        }, modifier = Modifier.defaultMinSize(minWidth = 160.dp),
+            colors = ButtonColors(Color(0xFF24389C), Color(0xFFFFFFFF),
+                Color(0xFF24389C),Color(0xFF24389C)))
+    }
+}
+
+@Composable
 private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier) {
     OutlinedCard(
         modifier = modifier
@@ -216,5 +244,13 @@ fun CountryItemPreview() {
     )
     MyApplicationTheme {
         CountryItem(country)
+    }
+}
+
+@Preview (showBackground = true)
+@Composable
+fun ErrorScreenPreview(){
+    MyApplicationTheme() {
+        ErrorScreen()
     }
 }
