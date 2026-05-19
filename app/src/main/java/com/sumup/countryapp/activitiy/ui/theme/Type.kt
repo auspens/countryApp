@@ -39,10 +39,19 @@ val fontFamilyNoto = FontFamily(
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = fontFamilyRoboto,
+        fontSize = 22.sp,
+        fontStyle = FontStyle.Normal,
+        lineHeight = 28.sp,
+        fontWeight = FontWeight(500),
+        color = Color(0xFF1C1B1F)
+    ),
+    bodySmall = TextStyle(
+        fontFamily = fontFamilyRoboto,
         fontSize = 16.sp,
+        fontStyle = FontStyle.Normal,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp,
-        color = fontGray
+        fontWeight = FontWeight(400),
+        color = Color(0xFF454652)
     ),
     titleLarge = TextStyle(
         fontFamily = fontFamilyNoto,

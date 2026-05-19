@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,14 +33,17 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BrushPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +54,7 @@ import com.sumup.countryapp.R
 import com.sumup.countryapp.activitiy.ui.theme.BackgroundGray
 import com.sumup.countryapp.activitiy.ui.theme.MyApplicationTheme
 import com.sumup.countryapp.activitiy.ui.theme.ShapeGray
+import com.sumup.countryapp.activitiy.ui.theme.Typography
 import com.sumup.countryapp.activitiy.ui.theme.fontGray
 import com.sumup.countryapp.datamodels.CountryDTOShort
 import com.sumup.countryapp.datamodels.FlagsDto
@@ -102,9 +109,14 @@ private fun CountriesList(viewModel: CountryViewModel) {
 @Composable
 private fun TopAppBar(){
     TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color(0xFFEBE7EC)
+        ),
+        windowInsets = WindowInsets(0.dp, top = 16.dp),
         title = {
             Row(verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
+                    .background(Color(0xFFEBE7EC))
             )
             {
                 Icon(
@@ -142,7 +154,9 @@ private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier)
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = {})
-            .padding(5.dp)
+            .padding(6.dp)
+            .background(color = Color(0xFFF7F2F8)),
+        border = BorderStroke(width = 1.dp, color = Color(0xFFE5E1E7))
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -150,6 +164,7 @@ private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier)
                 .fillMaxWidth()
                 .aspectRatio(4f)
                 .background(color = BackgroundGray)
+                .padding(16.dp)
         ) {
             AsyncImage(
                 model = country.flags?.png,
@@ -162,21 +177,23 @@ private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier)
                         )
                     )
                 ),
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
+                    .width(64.dp)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(BorderStroke(1.dp, Color(0xFFC5C5D4)))
+                    .background(Color.Transparent)
+                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)),
 
-                    .padding(10.dp)
-                    .clip(shape = RoundedCornerShape(15))
-                    .border(border = BorderStroke(1.dp, color = ShapeGray))
-                    .weight(1f),
-//                contentScale = ContentScale.Crop,
             )
             Column(
                 modifier = Modifier
-                    .padding(4.dp)
+                    .padding(horizontal = 16.dp)
                     .weight(2f)
             ) {
-                Text(text = country.name?.common ?: "Unknown", fontSize = 24.sp)
-                Text(text = country.region ?: "Unknown")
+                Text(text = country.name?.common ?: "Unknown", style = typography.bodyLarge)
+                Text(text = country.region ?: "Unknown", style = typography.bodySmall)
             }
             Icon(
                 painter = painterResource(R.drawable.ic_star_outlined),
