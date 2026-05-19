@@ -44,8 +44,8 @@ class CountryViewModel @Inject constructor(
         }
     }
 
-    fun <V> filterCountries(selector: (CountryDTOShort) -> V?, value: V) {
-        _filteredCountries.value = countries.value.filter { selector == value }
+    fun filterByRegion(region: String) {
+        _filteredCountries.value = countries.value.filter { country -> country.region == region}
     }
 
     fun removeFilter() {
