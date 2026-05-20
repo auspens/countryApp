@@ -1,7 +1,6 @@
-package com.sumup.countryapp.activitiy
+package com.sumup.countryapp.activity
 
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,7 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,15 +52,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.sumup.countryapp.R
-import com.sumup.countryapp.activitiy.ui.theme.BackgroundGray
-import com.sumup.countryapp.activitiy.ui.theme.MyApplicationTheme
-import com.sumup.countryapp.activitiy.ui.theme.ShapeGray
-import com.sumup.countryapp.activitiy.ui.theme.Typography
-import com.sumup.countryapp.activitiy.ui.theme.fontGray
+import com.sumup.countryapp.activity.ui.theme.BackgroundGray
+import com.sumup.countryapp.activity.ui.theme.MyApplicationTheme
+import com.sumup.countryapp.activity.ui.theme.fontGray
 import com.sumup.countryapp.datamodels.CountryDTOShort
 import com.sumup.countryapp.datamodels.FlagsDto
 import com.sumup.countryapp.datamodels.NameDto
@@ -80,6 +76,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 CountriesList(viewModel)
+
             }
 
         }
@@ -94,8 +91,7 @@ private fun CountriesList(viewModel: CountryViewModel) {
     Scaffold(
         topBar = {
             TopAppBar()
-        },
-        modifier = Modifier.padding(5.dp)
+        }, modifier = Modifier.padding(5.dp)
     ) { padding ->
         when (state) {
             is HomeUiState.Data -> LazyColumn(modifier = Modifier.padding(padding)) {
@@ -105,47 +101,52 @@ private fun CountriesList(viewModel: CountryViewModel) {
                     )
                 }
             }
-            is HomeUiState.Loading -> CircularProgressIndicator()
-            else -> Text(text = "Error loading countries list")
+
+            is HomeUiState.Loading -> Column(modifier = Modifier.padding(padding), content = {
+                repeat(6) {
+                    CountryItem(null)
+                }
+            })
+
+            else -> ErrorScreen(modifier = Modifier.padding(padding))
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopAppBar(){
+private fun TopAppBar() {
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color(0xFFEBE7EC)
         ),
         windowInsets = WindowInsets(0.dp, top = 16.dp),
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
                     .background(Color(0xFFEBE7EC))
-            )
-            {
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_globe),
                     tint = Color(0xFF24389C),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(20.dp)
+                    modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    "WorldAtlas", style = typography.titleLarge,
+                    "WorldAtlas",
+                    style = typography.titleLarge,
                     modifier = Modifier.padding(start = 8.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton({},
-                    modifier = Modifier
-                        .padding(8.dp)
-                ){
+                IconButton(
+                    {}, modifier = Modifier.padding(8.dp)
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(18.dp),
+                        modifier = Modifier.size(18.dp),
                         tint = Color(0xFF454652)
                     )
                 }
@@ -155,29 +156,39 @@ private fun TopAppBar(){
 }
 
 @Composable
-private fun ErrorScreen(){
-    Column(verticalArrangement = Arrangement.spacedBy(24.dp),
+private fun ErrorScreen(modifier: Modifier) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(16.dp)) {
-        Image(painter = painterResource(R.drawable.ic_error),
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_error),
             contentDescription = null,
-            Modifier.padding(16.dp)
-                .size(128.dp))
+            Modifier
+                .padding(16.dp)
+                .size(128.dp)
+        )
         Text("Something went wrong", style = typography.bodyLarge)
-        Text("We couldn't load the country list.\n" +
-                "Please check your connection and\n" +
-                "try again.", style = typography.bodySmall)
-        Button(onClick = {}, content = {
-            Icon(Icons.Outlined.Refresh, contentDescription = null)
-            Text("Retry", color = Color(0xFFFFFFFF),)
-        }, modifier = Modifier.defaultMinSize(minWidth = 160.dp),
-            colors = ButtonColors(Color(0xFF24389C), Color(0xFFFFFFFF),
-                Color(0xFF24389C),Color(0xFF24389C)))
+        Text(
+            "We couldn't load the country list.\n" + "Please check your connection and\n" + "try again.",
+            style = typography.bodySmall
+        )
+        Button(
+            onClick = {}, content = {
+                Icon(Icons.Outlined.Refresh, contentDescription = null)
+                Text("Retry", color = Color(0xFFFFFFFF))
+            }, modifier = Modifier.defaultMinSize(minWidth = 160.dp), colors = ButtonColors(
+                Color(0xFF24389C), Color(0xFFFFFFFF), Color(0xFF24389C), Color(0xFF24389C)
+            )
+        )
     }
 }
 
 @Composable
-private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier) {
+private fun CountryItem(country: CountryDTOShort?, modifier: Modifier = Modifier) {
     OutlinedCard(
         modifier = modifier
             .fillMaxWidth()
@@ -194,6 +205,93 @@ private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier)
                 .background(color = BackgroundGray)
                 .padding(16.dp)
         ) {
+            Flag(country)
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .weight(2f)
+            ) {
+                CountryName(country)
+                CountryRegion(country)
+            }
+            when (country) {
+                null -> {
+                    OutlinedCard(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(_root_ide_package_.androidx.compose.foundation.shape.CircleShape),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
+                    ) { }
+                }
+
+                else -> StarIcon()
+            }
+
+        }
+    }
+}
+
+@Composable
+private fun StarIcon() {
+    Icon(
+        painter = painterResource(R.drawable.ic_star_outlined),
+        contentDescription = null,
+        tint = fontGray,
+        modifier = Modifier.padding(end = 20.dp)
+    )
+}
+
+@Composable
+private fun CountryName(country: CountryDTOShort?) {
+    when (country) {
+        null -> {
+            OutlinedCard(
+                modifier = Modifier
+                    .width(70.dp)
+                    .height(28.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
+            ) { }
+        }
+        else -> {
+            Text(text = country.name?.common ?: "Unknown", style = typography.bodyLarge)
+        }
+    }
+}
+
+@Composable
+private fun CountryRegion(country: CountryDTOShort?) {
+    when (country) {
+        null -> {
+            OutlinedCard(
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(24.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
+            ) { }
+        }
+
+        else -> {
+            Text(text = country.region ?: "Unknown", style = typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+private fun Flag(country: CountryDTOShort?) {
+    when (country) {
+        null -> {
+            OutlinedCard(
+                modifier = Modifier
+                    .width(64.dp)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
+            ) { }
+        }
+
+        else -> {
             AsyncImage(
                 model = country.flags?.png,
                 contentDescription = null,
@@ -213,25 +311,9 @@ private fun CountryItem(country: CountryDTOShort, modifier: Modifier = Modifier)
                     .border(BorderStroke(1.dp, Color(0xFFC5C5D4)))
                     .background(Color.Transparent)
                     .shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)),
-
-            )
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .weight(2f)
-            ) {
-                Text(text = country.name?.common ?: "Unknown", style = typography.bodyLarge)
-                Text(text = country.region ?: "Unknown", style = typography.bodySmall)
-            }
-            Icon(
-                painter = painterResource(R.drawable.ic_star_outlined),
-                contentDescription = null,
-                tint = fontGray,
-                modifier = Modifier.padding(end = 20.dp)
             )
         }
     }
-
 }
 
 @Preview(showBackground = true)
@@ -247,10 +329,10 @@ fun CountryItemPreview() {
     }
 }
 
-@Preview (showBackground = true)
+@Preview(showBackground = true)
 @Composable
-fun ErrorScreenPreview(){
+fun ErrorScreenPreview() {
     MyApplicationTheme() {
-        ErrorScreen()
+        ErrorScreen(modifier = Modifier)
     }
 }

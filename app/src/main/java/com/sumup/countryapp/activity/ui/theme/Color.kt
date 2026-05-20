@@ -1,4 +1,4 @@
-package com.sumup.countryapp.activitiy.ui.theme
+package com.sumup.countryapp.activity.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
