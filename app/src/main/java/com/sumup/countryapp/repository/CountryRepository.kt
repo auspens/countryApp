@@ -8,5 +8,5 @@ interface CountryRepository {
     val countries:List<CountryBasic>
     val regions: List<String>
 
-    suspend fun fetchCountriesAndRegions(fields: List<String>)
+    suspend fun fetchCountriesAndRegions(): Result<List<CountryBasic>>
 }

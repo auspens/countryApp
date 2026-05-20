@@ -23,30 +23,21 @@ class CountryDirectoryViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState
 
     init {
-        viewModelScope.launch {
-            try {
-                repository.fetchCountriesAndRegions(listOf("name", "region", "flags"))
-                val fetchedCountries = repository.countries
-                _uiState.value =
-                    if (fetchedCountries.isNotEmpty()) HomeUiState.Data(fetchedCountries.toImmutableList())
-                    else HomeUiState.Error
-            } catch (e: Exception) {
-                _uiState.value = HomeUiState.Error
-            }
-        }
+        retryFetch()
     }
 
-    fun retryFetch(){
+    fun retryFetch() {
         viewModelScope.launch {
-            try {
-                _uiState.value = HomeUiState.Loading
-                repository.fetchCountriesAndRegions(listOf("name", "region", "flags"))
-                val fetchedCountries = repository.countries
-                _uiState.value =
-                    if (fetchedCountries.isNotEmpty()) HomeUiState.Data(fetchedCountries.toImmutableList())
-                    else HomeUiState.Error
-            } catch (e: Exception) {
-                _uiState.value = HomeUiState.Error
+            _uiState.value = HomeUiState.Loading
+            val response = repository.fetchCountriesAndRegions()
+            when {
+                response.isSuccess -> {
+                    _uiState.value =
+                        HomeUiState.Data(response.getOrDefault(emptyList()).toImmutableList())
+                }
+                else -> {
+                    _uiState.value = HomeUiState.Error
+                }
             }
         }
     }

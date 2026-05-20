@@ -42,61 +42,38 @@ internal fun CountryItem(
             verticalAlignment = Alignment.Companion.CenterVertically,
             modifier = Modifier.Companion.countryCardRow(),
         ) {
-            Flag(country)
+            AsyncImage(
+                model = country.flags?.png,
+                contentDescription = null,
+                placeholder = BrushPainter(
+                    Brush.Companion.linearGradient(
+                        listOf(FlagPlaceholderStart, FlagPlaceholderEnd),
+                    ),
+                ),
+                contentScale = ContentScale.Companion.Crop,
+                modifier = Modifier.Companion.flagImage(),
+            )
             Column(
                 modifier = Modifier.Companion
                     .padding(horizontal = CountryDimens.columnHorizontalPadding)
                     .weight(2f),
             ) {
-                CountryName(country)
-                CountryRegion(country)
-            }
-            StarIcon()
+                Text(
+                    text = country.name?.common ?: "Unknown",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = country.region ?: "Unknown",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )            }
+            Icon(
+                painter = painterResource(R.drawable.ic_star_outlined),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.Companion.padding(end = CountryDimens.starIconEndPadding),
+            )
         }
     }
-}
-
-
-@Composable
-private fun StarIcon() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_outlined),
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.Companion.padding(end = CountryDimens.starIconEndPadding),
-    )
-}
-
-@Composable
-private fun CountryName(country: CountryBasic) {
-    Text(
-        text = country.name?.common ?: "Unknown",
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurface,
-    )
-}
-
-
-@Composable
-private fun CountryRegion(country: CountryBasic) {
-    Text(
-        text = country.region ?: "Unknown",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-}
-
-@Composable
-private fun Flag(country: CountryBasic) {
-    AsyncImage(
-        model = country.flags?.png,
-        contentDescription = null,
-        placeholder = BrushPainter(
-            Brush.Companion.linearGradient(
-                listOf(FlagPlaceholderStart, FlagPlaceholderEnd),
-            ),
-        ),
-        contentScale = ContentScale.Companion.Crop,
-        modifier = Modifier.Companion.flagImage(),
-    )
 }

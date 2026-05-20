@@ -15,7 +15,7 @@ class CountryRepositoryImpl(
     val countryAppApi: com.sumup.countryapp.api.CountryAppApi
 ) : CountryRepository {
     private var _countries: List<CountryBasic> = emptyList()
-    private var _regions: List<String> =emptyList()
+    private var _regions: List<String> = emptyList()
 
     override val countries: List<CountryBasic>
         get() = _countries
@@ -24,24 +24,30 @@ class CountryRepositoryImpl(
         get() = _regions
 
 
-    override suspend fun fetchCountriesAndRegions(fields: List<String>) {
+    override suspend fun fetchCountriesAndRegions(): Result<List<CountryBasic>> {
         val setOfRegions = mutableSetOf<String>()
-        val response = withContext(Dispatchers.IO) {
-            countryAppApi.getCountries(fields.joinToString(","))
-        }
-        if (response.isSuccessful) {
-            val countryResponse = response.body()
-            if (countryResponse != null) {
-                _countries = countryResponse
-                countryResponse.mapNotNull {
-                    country -> country.region?.let{setOfRegions.add(it)}
-                }
-            } else {
-                throw (Exception("Empty response body"))
+
+        runCatching {
+            withContext(Dispatchers.IO) {
+                countryAppApi.getCountries("name,flags,region")
             }
-        } else {
-            throw (Exception("Error fetching countries: ${response.code()} ${response.message()}"))
-        }
-        _regions =  setOfRegions.toList()
+        }.onFailure { exception -> return Result.failure(exception) }
+            .onSuccess { response ->
+                if (response.isSuccessful) {
+                    val countryResponse = response.body()
+                    if (countryResponse != null) {
+                        _countries = countryResponse
+                        countryResponse.map { country ->
+                            country.region?.let { setOfRegions.add(it) }
+                            _regions = setOfRegions.toList()
+                            return Result.success(_countries)
+                        }
+                    } else {
+                        return Result.failure(Exception(response.errorBody().toString()))
+                    }
+                }
+            }
+
+        return Result.failure(Exception("Reached the end of runcatching"))
     }
 }

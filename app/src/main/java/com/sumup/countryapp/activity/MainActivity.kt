@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
 private fun Content(viewModel: CountryDirectoryViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
-        topBar = { CountryTopAppBar() },
+        topBar = { CountryTopAppBar(){} },
         modifier = Modifier.padding(CountryDimens.scaffoldOuterPadding),
     ) { padding ->
         when (state) {
@@ -104,7 +104,7 @@ private fun Content(viewModel: CountryDirectoryViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountryTopAppBar() {
+private fun CountryTopAppBar(clickAction:()->Unit) {
     TopAppBar(
         colors = countryTopAppBarColors(),
         windowInsets = WindowInsets(
@@ -130,7 +130,7 @@ private fun CountryTopAppBar() {
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
-                    onClick = {},
+                    onClick = clickAction,
                     modifier = Modifier.padding(CountryDimens.topBarActionPadding),
                 ) {
                     Icon(
