@@ -32,7 +32,11 @@ class CountryViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.initCountries(listOf("name", "region", "flags"))
+            try {
+                repository.initCountries(listOf("name", "region", "flags"))
+            } catch (e: Exception) {
+                _uiState.value= HomeUiState.Error
+            }
             repository.initRegions()
         }
         viewModelScope.launch {
