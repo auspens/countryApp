@@ -1,13 +1,12 @@
 package com.sumup.countryapp.repository
 
-import com.sumup.countryapp.datamodels.CountryDTOShort
+import com.sumup.countryapp.datamodels.CountryBasic
 import kotlinx.coroutines.flow.StateFlow
 
 interface CountryRepository {
 
-    val countries:StateFlow<List<CountryDTOShort>>
-    val regions: StateFlow<List<String>>
+    val countries:List<CountryBasic>
+    val regions: List<String>
 
-    suspend fun initCountries(fields: List<String>)
-    fun initRegions()
+    suspend fun fetchCountriesAndRegions(fields: List<String>)
 }

@@ -1,15 +1,10 @@
 package com.sumup.countryapp.activity
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,136 +13,131 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.BrushPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.sumup.countryapp.R
-import com.sumup.countryapp.activity.ui.theme.BackgroundGray
-import com.sumup.countryapp.activity.ui.theme.MyApplicationTheme
-import com.sumup.countryapp.activity.ui.theme.fontGray
-import com.sumup.countryapp.datamodels.CountryDTOShort
+import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.FlagsDto
 import com.sumup.countryapp.datamodels.NameDto
-import com.sumup.countryapp.viewmodel.CountryViewModel
+import com.sumup.countryapp.ui.theme.CountryAppTheme
+import com.sumup.countryapp.ui.theme.CountryDimens
+import com.sumup.countryapp.ui.theme.countryButtonColors
+import com.sumup.countryapp.ui.theme.countryTopAppBarColors
+import com.sumup.countryapp.ui.theme.topBarTitleRow
+import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.HomeUiState
 import dagger.hilt.android.AndroidEntryPoint
 
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: CountryViewModel by viewModels()
+    private val viewModel: CountryDirectoryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MyApplicationTheme {
-                CountriesList(viewModel)
-
+            CountryAppTheme {
+                Content(viewModel)
             }
-
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountriesList(viewModel: CountryViewModel) {
+private fun Content(viewModel: CountryDirectoryViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
-        topBar = {
-            TopAppBar()
-        }, modifier = Modifier.padding(5.dp)
+        topBar = { CountryTopAppBar() },
+        modifier = Modifier.padding(CountryDimens.scaffoldOuterPadding),
     ) { padding ->
         when (state) {
             is HomeUiState.Data -> LazyColumn(modifier = Modifier.padding(padding)) {
-                items((state as HomeUiState.Data).countries) { country ->
-                    CountryItem(
-                        country
-                    )
+                items(
+                    items = (state as HomeUiState.Data).countries,
+                    key = { item -> item.hashCode() },
+                ) { country ->
+                    CountryItem(country = country, modifier = Modifier, clickAction = {})
                 }
             }
 
-            is HomeUiState.Loading -> Column(modifier = Modifier.padding(padding), content = {
-                repeat(6) {
-                    CountryItem(null)
-                }
-            })
+            is HomeUiState.Loading -> Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.size(125.dp))
+                CircularProgressIndicator()
+                Text("Loading...")
+            }
 
-            else -> ErrorScreen(modifier = Modifier.padding(padding))
+            else -> ErrorScreen(
+                modifier = Modifier.padding(padding),
+                retry = { viewModel.retryFetch() },
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopAppBar() {
+private fun CountryTopAppBar() {
     TopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xFFEBE7EC)
+        colors = countryTopAppBarColors(),
+        windowInsets = WindowInsets(
+            left = CountryDimens.scaffoldOuterPadding,
+            top = CountryDimens.topBarTopInset,
         ),
-        windowInsets = WindowInsets(0.dp, top = 16.dp),
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFEBE7EC))
+                modifier = Modifier.topBarTitleRow(),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_globe),
-                    tint = Color(0xFF24389C),
+                    tint = MaterialTheme.colorScheme.primary,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(CountryDimens.globeIconSize),
                 )
                 Text(
-                    "WorldAtlas",
-                    style = typography.titleLarge,
-                    modifier = Modifier.padding(start = 8.dp)
+                    text = "WorldAtlas",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = CountryDimens.topBarIconSpacing),
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(
-                    {}, modifier = Modifier.padding(8.dp)
+                    onClick = {},
+                    modifier = Modifier.padding(CountryDimens.topBarActionPadding),
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_search),
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = Color(0xFF454652)
+                        modifier = Modifier.size(CountryDimens.searchIconSize),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -156,183 +146,64 @@ private fun TopAppBar() {
 }
 
 @Composable
-private fun ErrorScreen(modifier: Modifier) {
+private fun ErrorScreen(modifier: Modifier, retry: () -> Unit) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(CountryDimens.errorSpacing),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .padding(16.dp)
-            .fillMaxWidth()
+            .padding(CountryDimens.contentPadding)
+            .fillMaxWidth(),
     ) {
         Image(
             painter = painterResource(R.drawable.ic_error),
             contentDescription = null,
-            Modifier
-                .padding(16.dp)
-                .size(128.dp)
+            modifier = Modifier.aspectRatio(1f),
         )
-        Text("Something went wrong", style = typography.bodyLarge)
         Text(
-            "We couldn't load the country list.\n" + "Please check your connection and\n" + "try again.",
-            style = typography.bodySmall
+            text = "Something went wrong",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = "We couldn't load the country list.\n" +
+                    "Please check your connection and\n" +
+                    "try again.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Button(
-            onClick = {}, content = {
+            onClick = retry,
+            modifier = Modifier.defaultMinSize(minWidth = CountryDimens.retryButtonMinWidth),
+            colors = countryButtonColors(),
+            content = {
                 Icon(Icons.Outlined.Refresh, contentDescription = null)
-                Text("Retry", color = Color(0xFFFFFFFF))
-            }, modifier = Modifier.defaultMinSize(minWidth = 160.dp), colors = ButtonColors(
-                Color(0xFF24389C), Color(0xFFFFFFFF), Color(0xFF24389C), Color(0xFF24389C)
-            )
+                Text(
+                    text = "Retry",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            },
         )
     }
 }
 
-@Composable
-private fun CountryItem(country: CountryDTOShort?, modifier: Modifier = Modifier) {
-    OutlinedCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = {})
-            .padding(6.dp)
-            .background(color = Color(0xFFF7F2F8)),
-        border = BorderStroke(width = 1.dp, color = Color(0xFFE5E1E7))
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(4f)
-                .background(color = BackgroundGray)
-                .padding(16.dp)
-        ) {
-            Flag(country)
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .weight(2f)
-            ) {
-                CountryName(country)
-                CountryRegion(country)
-            }
-            when (country) {
-                null -> {
-                    OutlinedCard(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clip(_root_ide_package_.androidx.compose.foundation.shape.CircleShape),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
-                    ) { }
-                }
-
-                else -> StarIcon()
-            }
-
-        }
-    }
-}
-
-@Composable
-private fun StarIcon() {
-    Icon(
-        painter = painterResource(R.drawable.ic_star_outlined),
-        contentDescription = null,
-        tint = fontGray,
-        modifier = Modifier.padding(end = 20.dp)
-    )
-}
-
-@Composable
-private fun CountryName(country: CountryDTOShort?) {
-    when (country) {
-        null -> {
-            OutlinedCard(
-                modifier = Modifier
-                    .width(70.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
-            ) { }
-        }
-        else -> {
-            Text(text = country.name?.common ?: "Unknown", style = typography.bodyLarge)
-        }
-    }
-}
-
-@Composable
-private fun CountryRegion(country: CountryDTOShort?) {
-    when (country) {
-        null -> {
-            OutlinedCard(
-                modifier = Modifier
-                    .width(60.dp)
-                    .height(24.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
-            ) { }
-        }
-
-        else -> {
-            Text(text = country.region ?: "Unknown", style = typography.bodySmall)
-        }
-    }
-}
-
-@Composable
-private fun Flag(country: CountryDTOShort?) {
-    when (country) {
-        null -> {
-            OutlinedCard(
-                modifier = Modifier
-                    .width(64.dp)
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE5E1E7)),
-            ) { }
-        }
-
-        else -> {
-            AsyncImage(
-                model = country.flags?.png,
-                contentDescription = null,
-                placeholder = BrushPainter(
-                    Brush.linearGradient(
-                        listOf(
-                            Color(color = 0xFFFFFFFF),
-                            Color(color = 0xFFDDDDDD),
-                        )
-                    )
-                ),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .width(64.dp)
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(BorderStroke(1.dp, Color(0xFFC5C5D4)))
-                    .background(Color.Transparent)
-                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(8.dp)),
-            )
-        }
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
 fun CountryItemPreview() {
-    val country = CountryDTOShort(
+    val country = CountryBasic(
         region = "Europe",
         name = NameDto(common = "Germany", official = "Federal Republic of Germany"),
-        flags = FlagsDto(png = "https://flagcdn.com/w320/de.png")
+        flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"),
     )
-    MyApplicationTheme {
-        CountryItem(country)
+    CountryAppTheme {
+        CountryItem(country = country, modifier = Modifier, clickAction = {})
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ErrorScreenPreview() {
-    MyApplicationTheme() {
-        ErrorScreen(modifier = Modifier)
+    CountryAppTheme {
+        ErrorScreen(modifier = Modifier, retry = {})
     }
 }

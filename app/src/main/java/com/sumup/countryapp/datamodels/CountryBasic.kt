@@ -1,6 +1,6 @@
 package com.sumup.countryapp.datamodels
 
-data class CountryDTOShort(
+data class CountryBasic(
 
     val region: String? = null,
     val name: NameDto? = null,

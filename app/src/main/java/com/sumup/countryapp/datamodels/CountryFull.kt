@@ -1,6 +1,6 @@
 package com.sumup.countryapp.datamodels
 
-data class CountryDTOLong(
+data class CountryFull(
 
 //    @SerializedName("tld") val tld: List<String>? = null,
     val cca2: String? = null,
