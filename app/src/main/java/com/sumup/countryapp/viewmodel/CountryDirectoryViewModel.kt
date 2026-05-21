@@ -51,7 +51,7 @@ class CountryDirectoryViewModel @Inject constructor(
         if (filter == (_uiState.value as HomeUiState.Data).filter) return
         if (filter == "All") {
             _uiState.value = HomeUiState.Data(
-                repository.countries.toImmutableList(),
+                repository.countries,
                 repository.regions, filter
             )
         } else {

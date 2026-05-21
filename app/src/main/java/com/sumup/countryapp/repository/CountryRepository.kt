@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CountryRepository {
 
-    val countries:List<CountryBasic>
+    val countries:ImmutableList<CountryBasic>
     val regions: ImmutableList<String>
 
     suspend fun fetchCountriesAndRegions(): Result<List<CountryBasic>>

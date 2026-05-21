@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun regionFilterChipColors() = FilterChipDefaults.filterChipColors(
+private fun regionFilterChipColors() = FilterChipDefaults.filterChipColors(
     containerColor = MaterialTheme.colorScheme.surface,
     labelColor = MaterialTheme.colorScheme.onSurface,
     selectedContainerColor = MaterialTheme.colorScheme.primary,
@@ -19,7 +19,7 @@ fun regionFilterChipColors() = FilterChipDefaults.filterChipColors(
 )
 
 @Composable
-fun regionFilterChipBorder(selected: Boolean) = FilterChipDefaults.filterChipBorder(
+private fun regionFilterChipBorder(selected: Boolean) = FilterChipDefaults.filterChipBorder(
     enabled = true,
     selected = selected,
     borderColor = MaterialTheme.colorScheme.outline,
