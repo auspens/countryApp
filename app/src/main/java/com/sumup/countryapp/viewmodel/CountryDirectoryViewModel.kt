@@ -21,7 +21,7 @@ class CountryDirectoryViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
-    val _regions: MutableList<String> = mutableListOf("All")
+    private val _regions: MutableList<String> = mutableListOf("All")
 
 
     init {

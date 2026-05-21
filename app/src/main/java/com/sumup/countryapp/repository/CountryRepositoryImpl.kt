@@ -2,6 +2,8 @@ package com.sumup.countryapp.repository
 
 import android.util.Log
 import com.sumup.countryapp.datamodels.CountryBasic
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,17 +17,18 @@ import kotlin.collections.mutableSetOf
 class CountryRepositoryImpl(
     val countryAppApi: com.sumup.countryapp.api.CountryAppApi
 ) : CountryRepository {
-    private var _countries: List<CountryBasic> = emptyList()
-    private var _regions: List<String> = emptyList()
+    private var _countries: ImmutableList<CountryBasic> =
+        emptyList<CountryBasic>().toImmutableList()
+    private var _regions: ImmutableList<String> = emptyList<String>().toImmutableList()
 
-    override val countries: List<CountryBasic>
+    override val countries: ImmutableList<CountryBasic>
         get() = _countries
 
-    override val regions: List<String>
+    override val regions: ImmutableList<String>
         get() = _regions
 
 
-    override suspend fun fetchCountriesAndRegions(): Result<List<CountryBasic>> {
+    override suspend fun fetchCountriesAndRegions(): Result<ImmutableList<CountryBasic>> {
         val setOfRegions = mutableSetOf<String>()
 
         runCatching {
@@ -37,13 +40,13 @@ class CountryRepositoryImpl(
                 if (response.isSuccessful) {
                     val countryResponse = response.body()
                     if (countryResponse != null) {
-                        _countries = countryResponse
+                        _countries = countryResponse.toImmutableList()
                         _countries.map { country ->
                             country.region?.let {
                                 setOfRegions.add(it)
-                                _regions = setOfRegions.toList()
                             }
                         }
+                        _regions = setOfRegions.toList().toImmutableList()
                         return Result.success(_countries)
                     } else {
                         return Result.failure(Exception(response.errorBody().toString()))
