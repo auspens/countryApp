@@ -33,19 +33,43 @@ class CountryDirectoryViewModel @Inject constructor(
             when {
                 response.isSuccess -> {
                     _uiState.value =
-                        HomeUiState.Data(response.getOrDefault(emptyList()).toImmutableList())
+                        HomeUiState.Data(
+                            response.getOrDefault(emptyList()).toImmutableList(),
+                            repository.regions, "All"
+                        )
                 }
+
                 else -> {
                     _uiState.value = HomeUiState.Error
                 }
             }
         }
     }
-}
 
+    fun applyFilter(filter: String) {
+        if (_uiState.value !is HomeUiState.Data) return
+        if (filter == (_uiState.value as HomeUiState.Data).filter) return
+        if (filter == "All") {
+            _uiState.value = HomeUiState.Data(
+                repository.countries,
+                repository.regions, filter
+            )
+        } else {
+            _uiState.value = HomeUiState.Data(
+                repository.countries.filter { it.region == filter }.toImmutableList(),
+                repository.regions, filter
+            )
+        }
+    }
+}
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState
-    data class Data(val countries: ImmutableList<CountryBasic>) : HomeUiState
+    data class Data(
+        val countries: ImmutableList<CountryBasic>,
+        val regions: ImmutableList<String>,
+        val filter: String
+    ) : HomeUiState
+
     data object Error : HomeUiState
 }

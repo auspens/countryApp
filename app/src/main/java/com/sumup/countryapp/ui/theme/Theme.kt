@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
@@ -60,10 +61,7 @@ fun CountryAppTheme(
     )
 }
 
-@Composable
-fun skeletonCardColors() = CardDefaults.cardColors(
-    containerColor = MaterialTheme.colorScheme.outline,
-)
+
 
 @Composable
 fun countryButtonColors() = ButtonDefaults.buttonColors(

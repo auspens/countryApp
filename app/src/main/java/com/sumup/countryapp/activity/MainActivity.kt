@@ -1,12 +1,14 @@
 package com.sumup.countryapp.activity
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,15 +18,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,19 +74,14 @@ class MainActivity : ComponentActivity() {
 private fun Content(viewModel: CountryDirectoryViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
-        topBar = { CountryTopAppBar(){} },
+        topBar = {
+            CountryTopAppBar() {}
+        },
         modifier = Modifier.padding(CountryDimens.scaffoldOuterPadding),
     ) { padding ->
         when (state) {
-            is HomeUiState.Data -> LazyColumn(modifier = Modifier.padding(padding)) {
-                items(
-                    items = (state as HomeUiState.Data).countries,
-                    key = { item -> item.hashCode() },
-                ) { country ->
-                    CountryItem(country = country, modifier = Modifier, clickAction = {})
-                }
-            }
-
+            is HomeUiState.Data ->
+                CountriesList(padding, state as HomeUiState.Data, viewModel)
             is HomeUiState.Loading -> Column(
                 modifier = Modifier
                     .padding(padding)
@@ -102,9 +102,43 @@ private fun Content(viewModel: CountryDirectoryViewModel) {
     }
 }
 
+@Composable
+private fun CountriesList(
+    padding: PaddingValues,
+    state: HomeUiState.Data,
+    viewModel: CountryDirectoryViewModel
+) {
+    Column(
+        modifier = Modifier
+            .padding(padding)
+            .fillMaxWidth(),
+    ) {
+        LazyRow() {
+            items(
+                items = (state).regions,
+                key = { item -> item.hashCode() }
+            ) { region ->
+                RegionFilterChip(
+                    region,
+                    (state).filter,
+                    { viewModel.applyFilter(region) })
+            }
+
+        }
+        LazyColumn() {
+            items(
+                items = (state).countries,
+                key = { item -> item.hashCode() },
+            ) { country ->
+                CountryItem(country = country, modifier = Modifier, clickAction = {})
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountryTopAppBar(clickAction:()->Unit) {
+private fun CountryTopAppBar(clickAction: () -> Unit) {
     TopAppBar(
         colors = countryTopAppBarColors(),
         windowInsets = WindowInsets(
@@ -144,6 +178,7 @@ private fun CountryTopAppBar(clickAction:()->Unit) {
         },
     )
 }
+
 
 @Composable
 private fun ErrorScreen(modifier: Modifier, retry: () -> Unit) {
@@ -205,5 +240,13 @@ fun CountryItemPreview() {
 fun ErrorScreenPreview() {
     CountryAppTheme {
         ErrorScreen(modifier = Modifier, retry = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegionChipPreview() {
+    CountryAppTheme() {
+        RegionFilterChip ("Europe", "Europe") {}
     }
 }
