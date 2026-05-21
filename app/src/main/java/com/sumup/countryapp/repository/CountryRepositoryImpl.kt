@@ -19,13 +19,13 @@ class CountryRepositoryImpl(
 ) : CountryRepository {
     private var _countries: ImmutableList<CountryBasic> =
         emptyList<CountryBasic>().toImmutableList()
-    private var _regions: ImmutableList<String> = emptyList<String>().toImmutableList()
+    private var _regions: MutableList<String> = mutableListOf("All")
 
     override val countries: ImmutableList<CountryBasic>
         get() = _countries
 
     override val regions: ImmutableList<String>
-        get() = _regions
+        get() = _regions.toImmutableList()
 
 
     override suspend fun fetchCountriesAndRegions(): Result<ImmutableList<CountryBasic>> {
@@ -46,7 +46,7 @@ class CountryRepositoryImpl(
                                 setOfRegions.add(it)
                             }
                         }
-                        _regions = setOfRegions.toList().toImmutableList()
+                        _regions.addAll(setOfRegions)
                         return Result.success(_countries)
                     } else {
                         return Result.failure(Exception(response.errorBody().toString()))

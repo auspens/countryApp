@@ -21,8 +21,6 @@ class CountryDirectoryViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
-    private val _regions: MutableList<String> = mutableListOf("All")
-
 
     init {
         retryFetch()
@@ -34,11 +32,10 @@ class CountryDirectoryViewModel @Inject constructor(
             val response = repository.fetchCountriesAndRegions()
             when {
                 response.isSuccess -> {
-                    _regions.addAll(repository.regions)
                     _uiState.value =
                         HomeUiState.Data(
                             response.getOrDefault(emptyList()).toImmutableList(),
-                            _regions.toImmutableList(), "All"
+                            repository.regions, "All"
                         )
                 }
 
@@ -55,17 +52,16 @@ class CountryDirectoryViewModel @Inject constructor(
         if (filter == "All") {
             _uiState.value = HomeUiState.Data(
                 repository.countries.toImmutableList(),
-                _regions.toImmutableList(), filter
+                repository.regions, filter
             )
         } else {
             _uiState.value = HomeUiState.Data(
                 repository.countries.filter { it.region == filter }.toImmutableList(),
-                _regions.toImmutableList(), filter
+                repository.regions, filter
             )
         }
     }
 }
-
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState

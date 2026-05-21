@@ -81,8 +81,7 @@ private fun Content(viewModel: CountryDirectoryViewModel) {
     ) { padding ->
         when (state) {
             is HomeUiState.Data ->
-                CountriesList(padding, state, viewModel)
-
+                CountriesList(padding, state as HomeUiState.Data, viewModel)
             is HomeUiState.Loading -> Column(
                 modifier = Modifier
                     .padding(padding)
@@ -106,7 +105,7 @@ private fun Content(viewModel: CountryDirectoryViewModel) {
 @Composable
 private fun CountriesList(
     padding: PaddingValues,
-    state: HomeUiState,
+    state: HomeUiState.Data,
     viewModel: CountryDirectoryViewModel
 ) {
     Column(
@@ -116,19 +115,19 @@ private fun CountriesList(
     ) {
         LazyRow() {
             items(
-                items = (state as HomeUiState.Data).regions,
+                items = (state).regions,
                 key = { item -> item.hashCode() }
             ) { region ->
                 RegionFilterChip(
                     region,
-                    (state as HomeUiState.Data).filter,
+                    (state).filter,
                     { viewModel.applyFilter(region) })
             }
 
         }
         LazyColumn() {
             items(
-                items = (state as HomeUiState.Data).countries,
+                items = (state).countries,
                 key = { item -> item.hashCode() },
             ) { country ->
                 CountryItem(country = country, modifier = Modifier, clickAction = {})

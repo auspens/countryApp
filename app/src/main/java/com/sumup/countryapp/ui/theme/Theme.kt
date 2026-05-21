@@ -61,23 +61,7 @@ fun CountryAppTheme(
     )
 }
 
-@Composable
-fun regionFilterChipColors() = FilterChipDefaults.filterChipColors(
-    // Unselected — match country cards (OutlinedCard surface + onSurface text)
-    containerColor = MaterialTheme.colorScheme.surface,
-    labelColor = MaterialTheme.colorScheme.onSurface,
-    // Selected — brand blue fill + white label
-    selectedContainerColor = MaterialTheme.colorScheme.primary,
-    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
-)
 
-@Composable
-fun regionFilterChipBorder(selected: Boolean) = FilterChipDefaults.filterChipBorder(
-    enabled = true,
-    selected = selected,
-    borderColor = MaterialTheme.colorScheme.outline,
-    selectedBorderColor = MaterialTheme.colorScheme.primary,
-)
 
 @Composable
 fun countryButtonColors() = ButtonDefaults.buttonColors(
