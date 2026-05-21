@@ -1,5 +1,6 @@
 package com.sumup.countryapp.repository
 
+import android.util.Log
 import com.sumup.countryapp.datamodels.CountryBasic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,11 +38,13 @@ class CountryRepositoryImpl(
                     val countryResponse = response.body()
                     if (countryResponse != null) {
                         _countries = countryResponse
-                        countryResponse.map { country ->
-                            country.region?.let { setOfRegions.add(it) }
-                            _regions = setOfRegions.toList()
-                            return Result.success(_countries)
+                        _countries.map { country ->
+                            country.region?.let {
+                                setOfRegions.add(it)
+                                _regions = setOfRegions.toList()
+                            }
                         }
+                        return Result.success(_countries)
                     } else {
                         return Result.failure(Exception(response.errorBody().toString()))
                     }

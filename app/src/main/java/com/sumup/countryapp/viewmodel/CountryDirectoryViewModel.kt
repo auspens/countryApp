@@ -21,6 +21,8 @@ class CountryDirectoryViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
+    val _regions: MutableList<String> = mutableListOf("All")
+
 
     init {
         retryFetch()
@@ -32,13 +34,34 @@ class CountryDirectoryViewModel @Inject constructor(
             val response = repository.fetchCountriesAndRegions()
             when {
                 response.isSuccess -> {
+                    _regions.addAll(repository.regions)
                     _uiState.value =
-                        HomeUiState.Data(response.getOrDefault(emptyList()).toImmutableList())
+                        HomeUiState.Data(
+                            response.getOrDefault(emptyList()).toImmutableList(),
+                            _regions.toImmutableList(), "All"
+                        )
                 }
+
                 else -> {
                     _uiState.value = HomeUiState.Error
                 }
             }
+        }
+    }
+
+    fun applyFilter(filter: String) {
+        if (_uiState.value !is HomeUiState.Data) return
+        if (filter == (_uiState.value as HomeUiState.Data).filter) return
+        if (filter == "All") {
+            _uiState.value = HomeUiState.Data(
+                repository.countries.toImmutableList(),
+                _regions.toImmutableList(), filter
+            )
+        } else {
+            _uiState.value = HomeUiState.Data(
+                repository.countries.filter { it.region == filter }.toImmutableList(),
+                _regions.toImmutableList(), filter
+            )
         }
     }
 }
@@ -46,6 +69,11 @@ class CountryDirectoryViewModel @Inject constructor(
 
 sealed interface HomeUiState {
     data object Loading : HomeUiState
-    data class Data(val countries: ImmutableList<CountryBasic>) : HomeUiState
+    data class Data(
+        val countries: ImmutableList<CountryBasic>,
+        val regions: ImmutableList<String>,
+        val filter: String
+    ) : HomeUiState
+
     data object Error : HomeUiState
 }

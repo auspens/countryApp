@@ -1,6 +1,7 @@
 package com.sumup.countryapp.activity
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -16,15 +17,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -44,6 +48,8 @@ import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.ui.theme.CountryDimens
 import com.sumup.countryapp.ui.theme.countryButtonColors
 import com.sumup.countryapp.ui.theme.countryTopAppBarColors
+import com.sumup.countryapp.ui.theme.regionFilterChipBorder
+import com.sumup.countryapp.ui.theme.regionFilterChipColors
 import com.sumup.countryapp.ui.theme.topBarTitleRow
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.HomeUiState
@@ -69,18 +75,35 @@ class MainActivity : ComponentActivity() {
 private fun Content(viewModel: CountryDirectoryViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
-        topBar = { CountryTopAppBar(){} },
+        topBar = {
+            CountryTopAppBar() {}
+        },
         modifier = Modifier.padding(CountryDimens.scaffoldOuterPadding),
     ) { padding ->
         when (state) {
-            is HomeUiState.Data -> LazyColumn(modifier = Modifier.padding(padding)) {
-                items(
-                    items = (state as HomeUiState.Data).countries,
-                    key = { item -> item.hashCode() },
-                ) { country ->
-                    CountryItem(country = country, modifier = Modifier, clickAction = {})
+            is HomeUiState.Data ->
+                Column(modifier = Modifier
+                    .padding(padding)
+                    .fillMaxWidth(),
+                ) {
+                    LazyRow() {
+                        items(
+                            items = (state as HomeUiState.Data).regions,
+                            key = { item -> item.hashCode() }
+                        ) { region ->
+                            RegionButton(region, (state as HomeUiState.Data).filter, {viewModel.applyFilter(region)})
+                        }
+
+                    }
+                    LazyColumn() {
+                        items(
+                            items = (state as HomeUiState.Data).countries,
+                            key = { item -> item.hashCode() },
+                        ) { country ->
+                            CountryItem(country = country, modifier = Modifier, clickAction = {})
+                        }
+                    }
                 }
-            }
 
             is HomeUiState.Loading -> Column(
                 modifier = Modifier
@@ -104,7 +127,7 @@ private fun Content(viewModel: CountryDirectoryViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountryTopAppBar(clickAction:()->Unit) {
+private fun CountryTopAppBar(clickAction: () -> Unit) {
     TopAppBar(
         colors = countryTopAppBarColors(),
         windowInsets = WindowInsets(
@@ -142,6 +165,24 @@ private fun CountryTopAppBar(clickAction:()->Unit) {
                 }
             }
         },
+    )
+}
+
+@Composable
+private fun RegionButton(region: String, filter: String, clickAction: () -> Unit) {
+    val selected = region == filter
+    FilterChip(
+        selected = selected,
+        onClick = clickAction,
+        label = {
+            Text(
+                text = region,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            )
+        },
+        colors = regionFilterChipColors(),
+        border = regionFilterChipBorder(selected = selected),
+        modifier = Modifier.padding(6.dp)
     )
 }
 
@@ -205,5 +246,13 @@ fun CountryItemPreview() {
 fun ErrorScreenPreview() {
     CountryAppTheme {
         ErrorScreen(modifier = Modifier, retry = {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegionButtonPreview() {
+    CountryAppTheme() {
+        RegionButton("Europe", "Europe") {}
     }
 }

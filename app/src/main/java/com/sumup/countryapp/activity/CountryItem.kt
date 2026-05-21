@@ -39,8 +39,8 @@ internal fun CountryItem(
         ),
     ) {
         Row(
-            verticalAlignment = Alignment.Companion.CenterVertically,
-            modifier = Modifier.Companion.countryCardRow(),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.countryCardRow(),
         ) {
             AsyncImage(
                 model = country.flags?.png,
@@ -50,11 +50,11 @@ internal fun CountryItem(
                         listOf(FlagPlaceholderStart, FlagPlaceholderEnd),
                     ),
                 ),
-                contentScale = ContentScale.Companion.Crop,
-                modifier = Modifier.Companion.flagImage(),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.flagImage(),
             )
             Column(
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .padding(horizontal = CountryDimens.columnHorizontalPadding)
                     .weight(2f),
             ) {
@@ -72,7 +72,7 @@ internal fun CountryItem(
                 painter = painterResource(R.drawable.ic_star_outlined),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.Companion.padding(end = CountryDimens.starIconEndPadding),
+                modifier = Modifier.padding(end = CountryDimens.starIconEndPadding),
             )
         }
     }
