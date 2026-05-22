@@ -4,7 +4,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -13,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.painter.BrushPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
@@ -30,6 +34,8 @@ internal fun CountryItem(
     country: CountryBasic,
     modifier: Modifier = Modifier,
     clickAction: () -> Unit,
+    toggleFavorites: () -> Unit,
+    isFavourite: Boolean
 ) {
     OutlinedCard(
         modifier = modifier.countryCard(onClick = clickAction),
@@ -67,13 +73,18 @@ internal fun CountryItem(
                     text = country.region ?: "Unknown",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )            }
-            Icon(
-                painter = painterResource(R.drawable.ic_star_outlined),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.Companion.padding(end = CountryDimens.starIconEndPadding),
-            )
+                )
+            }
+            IconButton(
+                onClick = toggleFavorites
+            ) {
+                Icon(
+                    modifier = Modifier.Companion.padding(end = CountryDimens.starIconEndPadding),
+                    painter = if(isFavourite)rememberVectorPainter(Icons.Filled.Star) else painterResource(R.drawable.ic_star_outlined),
+                    contentDescription = null,
+                    tint = if (isFavourite)MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

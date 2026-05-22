@@ -90,4 +90,5 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.datastore.preferences)
 }

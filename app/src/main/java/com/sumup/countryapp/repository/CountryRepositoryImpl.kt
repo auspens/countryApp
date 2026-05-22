@@ -10,11 +10,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import kotlin.String
 import kotlin.collections.mutableSetOf
 
 
-class CountryRepositoryImpl(
+class CountryRepositoryImpl @Inject constructor(
     val countryAppApi: com.sumup.countryapp.api.CountryAppApi
 ) : CountryRepository {
     private var _countries: ImmutableList<CountryBasic> =

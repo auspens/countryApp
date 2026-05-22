@@ -28,3 +28,5 @@ val OnSurfaceMutedDark = Color(0xFFCAC4D0)
 val OnSurfaceDark = Color(0xFFE6E1E5)
 val OnSurfaceVariantDark = Color(0xFFCAC4D0)
 val OnSurfaceDimDark = Color(0xFF938F99)
+
+val SelectedOrange = Color(0xFFf7af4a)

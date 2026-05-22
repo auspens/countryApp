@@ -130,7 +130,9 @@ private fun CountriesList(
                 items = (state).countries,
                 key = { item -> item.hashCode() },
             ) { country ->
-                CountryItem(country = country, modifier = Modifier, clickAction = {})
+                CountryItem(country = country, modifier = Modifier, clickAction = {},
+                    toggleFavorites = { viewModel.toggleFavorite(country.name?.common ?: "") },
+                    isFavourite = (state).favorites.contains(country.name?.common ?: ""))
             }
         }
     }
@@ -231,7 +233,7 @@ fun CountryItemPreview() {
         flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"),
     )
     CountryAppTheme {
-        CountryItem(country = country, modifier = Modifier, clickAction = {})
+        CountryItem(country = country, modifier = Modifier, clickAction = {}, toggleFavorites = {}, isFavourite = true)
     }
 }
 
