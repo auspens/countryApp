@@ -21,10 +21,10 @@ class FavouritesRepositoryImpl @Inject constructor(private val dataStore: DataSt
 
         try {
             val flow = dataStore.data.first()
-            val favsSet = flow[KEY_NAME]
-            return favsSet ?: emptySet()
+            val favsSet:Set<String>? = flow[KEY_NAME]
+            return favsSet ?: emptySet<String>()
         } catch (exception: Exception) {
-            return emptySet()
+            return emptySet<String>()
         }
 
     }

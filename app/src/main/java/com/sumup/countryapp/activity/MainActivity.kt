@@ -1,7 +1,7 @@
 package com.sumup.countryapp.activity
 
+import android.R.attr.padding
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,11 +26,11 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,10 +42,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.rememberNavBackStack
 import com.sumup.countryapp.R
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.FlagsDto
 import com.sumup.countryapp.datamodels.NameDto
+import com.sumup.countryapp.navigation.Favourites
+import com.sumup.countryapp.navigation.Home
+import com.sumup.countryapp.navigation.NavigationRoot
 import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.ui.theme.CountryDimens
 import com.sumup.countryapp.ui.theme.countryButtonColors
@@ -63,54 +68,91 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CountryAppTheme {
-                Content(viewModel)
+                val bottomNavItems = listOf(Home, Favourites)
+                val backStack = rememberNavBackStack(Home)
+                Scaffold(
+                    topBar = {
+                        CountryTopAppBar() {}
+                    },
+                    bottomBar = {
+                        NavigationBar {
+                            bottomNavItems.forEach { item ->
+                                val selected = backStack.lastOrNull() == item
+                                NavigationBarItem(
+                                    selected = selected,
+                                    onClick = {
+                                        if (!selected) {
+                                            backStack.clear()
+                                            backStack.add(item)
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            imageVector = item.icon,
+                                            contentDescription = item.title
+                                        )
+                                    },
+                                    label = {
+                                        Text(item.title)
+                                    },
+                                )
+                            }
+                        }
+                    })
+                { padding ->
+                    NavigationRoot(
+                        backStack = backStack,
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(padding)
+                    )
+                }
             }
         }
     }
 }
 
+@Composable
+fun HomePage(viewModel: CountryDirectoryViewModel){
+    viewModel.switchToAll()
+        CountryDirectoryScreen(viewModel = viewModel)
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Content(viewModel: CountryDirectoryViewModel) {
+fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    Scaffold(
-        topBar = {
-            CountryTopAppBar() {}
-        },
-        modifier = Modifier.padding(CountryDimens.scaffoldOuterPadding),
-    ) { padding ->
-        when (state) {
-            is HomeUiState.Data ->
-                CountriesList(padding, state as HomeUiState.Data, viewModel)
-            is HomeUiState.Loading -> Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.size(125.dp))
-                CircularProgressIndicator()
-                Text("Loading...")
-            }
+    when (state) {
+        is HomeUiState.Data ->
+            CountriesList(state as HomeUiState.Data, viewModel)
 
-            else -> ErrorScreen(
-                modifier = Modifier.padding(padding),
-                retry = { viewModel.retryFetch() },
-            )
+        is HomeUiState.Loading -> Column(
+            modifier = Modifier
+                .padding(6.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.size(125.dp))
+            CircularProgressIndicator()
+            Text("Loading...")
         }
+
+        else -> ErrorScreen(
+            modifier = Modifier.padding(6.dp),
+            retry = { viewModel.retryFetch() },
+        )
     }
 }
+
 
 @Composable
 private fun CountriesList(
-    padding: PaddingValues,
+
     state: HomeUiState.Data,
     viewModel: CountryDirectoryViewModel
 ) {
     Column(
         modifier = Modifier
-            .padding(padding)
+            .padding(6.dp)
             .fillMaxWidth(),
     ) {
         LazyRow() {
@@ -130,9 +172,11 @@ private fun CountriesList(
                 items = (state).countries,
                 key = { item -> item.hashCode() },
             ) { country ->
-                CountryItem(country = country, modifier = Modifier, clickAction = {},
+                CountryItem(
+                    country = country, modifier = Modifier, clickAction = {},
                     toggleFavorites = { viewModel.toggleFavorite(country.name?.common ?: "") },
-                    isFavourite = (state).favorites.contains(country.name?.common ?: ""))
+                    isFavourite = (state).favorites.contains(country.name?.common ?: "")
+                )
             }
         }
     }
@@ -233,7 +277,13 @@ fun CountryItemPreview() {
         flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"),
     )
     CountryAppTheme {
-        CountryItem(country = country, modifier = Modifier, clickAction = {}, toggleFavorites = {}, isFavourite = true)
+        CountryItem(
+            country = country,
+            modifier = Modifier,
+            clickAction = {},
+            toggleFavorites = {},
+            isFavourite = true
+        )
     }
 }
 
@@ -249,6 +299,6 @@ fun ErrorScreenPreview() {
 @Composable
 fun RegionChipPreview() {
     CountryAppTheme() {
-        RegionFilterChip ("Europe", "Europe") {}
+        RegionFilterChip("Europe", "Europe") {}
     }
 }

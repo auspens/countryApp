@@ -82,6 +82,32 @@ class CountryDirectoryViewModel @Inject constructor(
             }
         }
     }
+
+    fun switchToFavourites() {
+        if (_uiState.value !is HomeUiState.Data) return
+        viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading
+            val response: Set<String> = favouritesRepository.getFavouriteCountries()
+            _uiState.value = HomeUiState.Data(
+                repository.countries.filter { response.contains(it.name?.common ?: "") }.toImmutableList(),
+                repository.regions, "Favourites", response
+            )
+
+        }
+    }
+
+    fun switchToAll() {
+        if (_uiState.value !is HomeUiState.Data) return
+        viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading
+            val response: Set<String> = favouritesRepository.getFavouriteCountries()
+            _uiState.value = HomeUiState.Data(
+                repository.countries,
+                repository.regions, "All", response
+            )
+
+        }
+    }
 }
 
 sealed interface HomeUiState {
