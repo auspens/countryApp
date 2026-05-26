@@ -23,7 +23,10 @@ fun NavigationRoot(backStack: NavBackStack<NavKey>,
             }
             entry<Saved> {
                 viewModel.switchToFavourites()
-                CountryDirectoryScreen(viewModel, modifier)
+                CountryDirectoryScreen(viewModel, modifier, onShowAllCountriesClick = {
+                    backStack.clear()
+                    backStack.add(Home)
+                })
             }
         }
     )

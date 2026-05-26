@@ -1,7 +1,6 @@
 package com.sumup.countryapp.activity
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -25,11 +24,11 @@ import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,6 +40,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.sumup.countryapp.R
 import com.sumup.countryapp.datamodels.CountryBasic
@@ -71,7 +72,7 @@ class MainActivity : ComponentActivity() {
                 val backStack = rememberNavBackStack(Home)
                 Scaffold(
                     topBar = {
-                        CountryTopAppBar() {}
+                        CountryTopAppBar(clickAction = {}, text = if(backStack[0]== Home) "World Atlas" else "Saved")
                     },
                     bottomBar = {
                         NavigationBar {
@@ -112,11 +113,11 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modifier = Modifier) {
+fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modifier = Modifier, onShowAllCountriesClick: () -> Unit = {}) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     when (state) {
         is HomeUiState.Data ->
-            CountriesList(state as HomeUiState.Data, viewModel, modifier)
+            CountriesList(state as HomeUiState.Data, viewModel, modifier, onShowAllCountriesClick)
 
         is HomeUiState.Loading -> Column(
             modifier = Modifier
@@ -137,43 +138,9 @@ fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modif
     }
 }
 
-@Composable
-private fun CountriesList(
-    padding: PaddingValues,
-    state: HomeUiState.Data,
-    viewModel: CountryDirectoryViewModel
-) {
-    Column(
-        modifier = Modifier
-            .padding(padding)
-            .fillMaxWidth(),
-    ) {
-        LazyRow() {
-            items(
-                items = (state).regions,
-                key = { item -> item.hashCode() }
-            ) { region ->
-                RegionFilterChip(
-                    region,
-                    (state).filter,
-                    { viewModel.applyFilter(region) })
-            }
-
-        }
-        LazyColumn() {
-            items(
-                items = (state).countries,
-                key = { item -> item.hashCode() },
-            ) { country ->
-                CountryItem(country = country, modifier = Modifier, clickAction = {})
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountryTopAppBar(clickAction: () -> Unit) {
+private fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
     TopAppBar(
         colors = countryTopAppBarColors(),
         windowInsets = WindowInsets(
@@ -192,7 +159,7 @@ private fun CountryTopAppBar(clickAction: () -> Unit) {
                     modifier = Modifier.size(CountryDimens.globeIconSize),
                 )
                 Text(
-                    text = "WorldAtlas",
+                    text = text,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(start = CountryDimens.topBarIconSpacing),
