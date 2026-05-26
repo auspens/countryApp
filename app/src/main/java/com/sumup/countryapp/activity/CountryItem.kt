@@ -37,7 +37,6 @@ internal fun CountryItem(
     modifier: Modifier = Modifier,
     clickAction: () -> Unit,
     toggleFavorites: () -> Unit,
-    isFavourite: Boolean
 ) {
     OutlinedCard(
         modifier = modifier.countryCard(onClick = clickAction),
@@ -82,9 +81,9 @@ internal fun CountryItem(
             ) {
                 Icon(
                     modifier = Modifier.Companion.padding(end = CountryDimens.starIconEndPadding),
-                    painter = if(isFavourite)rememberVectorPainter(Icons.Filled.Star) else painterResource(R.drawable.ic_star_outlined),
+                    painter = if(country.isFavourite)rememberVectorPainter(Icons.Filled.Star) else painterResource(R.drawable.ic_star_outlined),
                     contentDescription = null,
-                    tint = if (isFavourite)MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (country.isFavourite)MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

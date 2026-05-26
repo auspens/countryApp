@@ -28,9 +28,10 @@ import com.sumup.countryapp.viewmodel.HomeUiState
 @Composable
 internal fun CountriesList(
     state: HomeUiState.Data,
-    viewModel: CountryDirectoryViewModel,
     modifier: Modifier,
     onShowAllCountriesClick: () -> Unit = {},
+    onToggleFavourite: (String)-> Unit,
+    onApplyFilter: (String)-> Unit
 ) {
     if (state.countries.isEmpty()) {
         ListIsEmpty(modifier, onShowAllCountriesClick)
@@ -38,7 +39,6 @@ internal fun CountriesList(
     }
     Column(
         modifier = modifier
-//            .padding(6.dp)
             .fillMaxWidth(),
     ) {
         LazyRow() {
@@ -49,7 +49,7 @@ internal fun CountriesList(
                 RegionFilterChip(
                     region,
                     (state).filter,
-                    { viewModel.applyFilter(region) })
+                    { onApplyFilter(region) })
             }
 
         }
@@ -60,8 +60,7 @@ internal fun CountriesList(
             ) { country ->
                 CountryItem(
                     country = country, modifier = Modifier.Companion, clickAction = {},
-                    toggleFavorites = { viewModel.toggleFavorite(country.name?.common ?: "") },
-                    isFavourite = (state).saved.contains(country.name?.common ?: "")
+                    toggleFavorites = { onToggleFavourite(country.name?.common ?: "") }
                 )
             }
         }
@@ -73,7 +72,8 @@ internal fun ListIsEmpty(
     modifier: Modifier = Modifier,
     onShowAllCountriesClick: () -> Unit
 ) {
-    Column(modifier = modifier.fillMaxWidth()
+    Column(modifier = modifier
+        .fillMaxWidth()
         .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(

@@ -1,5 +1,7 @@
 package com.sumup.countryapp.viewmodel
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumup.countryapp.datamodels.CountryBasic
@@ -35,10 +37,11 @@ class CountryDirectoryViewModel @Inject constructor(
             val favorites = favouritesRepository.getFavouriteCountries()
             when {
                 response.isSuccess -> {
+                    repository.countries.apply { forEach { it.isFavourite = (favorites.contains(it.name?.common)) } }
                     _uiState.value =
                         HomeUiState.Data(
-                            response.getOrDefault(emptyList()).toImmutableList(),
-                            repository.regions, "All", favorites, currentScreen = CurrentScreen.All
+                            response.getOrDefault(SnapshotStateList()),
+                            repository.regions, "All", currentScreen = CurrentScreen.All
                         )
                 }
 
@@ -61,27 +64,27 @@ class CountryDirectoryViewModel @Inject constructor(
                 repository.countries,
                 repository.regions,
                 filter,
-                (_uiState.value as HomeUiState.Data).saved,
                 currentScreen = CurrentScreen.All
             )
         } else {
-            val countries = repository.countries.filter { it.region == filter }.toImmutableList()
+            val countries = repository.countries.filter { it.region == filter }
             if ((_uiState.value as HomeUiState.Data).currentScreen == CurrentScreen.Saved) {
                 _uiState.value = HomeUiState.Data(
-                    countries.filter {
-                        (_uiState.value as HomeUiState.Data).saved.contains(
-                            it.name?.common ?: ""
-                        )
-                    }.toImmutableList(),
-                    repository.regions,
-                    filter,
-                    (_uiState.value as HomeUiState.Data).saved,
-                    currentScreen = CurrentScreen.Saved
+                    mutableStateListOf<CountryBasic>().apply {
+                        addAll(countries.filter {
+                            it.isFavourite
+                        })
+                    },
+                    regions = repository.regions,
+                    filter = filter,
+                    currentScreen = CurrentScreen.Saved,
                 )
                 return
             }
             _uiState.value = HomeUiState.Data(
-                countries, repository.regions, filter, (_uiState.value as HomeUiState.Data).saved,
+                mutableStateListOf<CountryBasic>().apply { addAll(countries) },
+                repository.regions,
+                filter,
                 CurrentScreen.All
             )
         }
@@ -89,19 +92,18 @@ class CountryDirectoryViewModel @Inject constructor(
 
     fun toggleFavorite(countryName: String) {
         if (_uiState.value !is HomeUiState.Data) return
-        val currentState = _uiState.value as HomeUiState.Data
-        val saved = currentState.saved.toMutableSet()
-        if (saved.contains(countryName)) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
+            if (savedList.contains(countryName)) {
                 favouritesRepository.removeFromFavourites(countryName)
-                saved.remove(countryName)
-                _uiState.value = currentState.copy(saved = saved)
-            }
-        } else {
-            viewModelScope.launch {
+                val index = repository.countries.indexOfFirst { it.name?.common == countryName }
+                repository.countries[index] = repository.countries[index].copy(isFavourite = false)
+                applyFilter((_uiState.value as HomeUiState.Data).filter)
+            } else {
                 favouritesRepository.addToFavourites(countryName)
-                saved.add(countryName)
-                _uiState.value = currentState.copy(saved = saved)
+                val index = repository.countries.indexOfFirst { it.name?.common == countryName }
+                repository.countries[index] = repository.countries[index].copy(isFavourite = true)
+                applyFilter((_uiState.value as HomeUiState.Data).filter)
             }
         }
     }
@@ -110,11 +112,9 @@ class CountryDirectoryViewModel @Inject constructor(
         if (_uiState.value !is HomeUiState.Data) return
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
-            val response: Set<String> = favouritesRepository.getFavouriteCountries()
             _uiState.value = HomeUiState.Data(
-                repository.countries.filter { response.contains(it.name?.common ?: "") }
-                    .toImmutableList(),
-                repository.regions, "Favourites", response, currentScreen = CurrentScreen.Saved
+                mutableStateListOf<CountryBasic>().apply { addAll(repository.countries.filter { it.isFavourite }) },
+                repository.regions, "Favourites", currentScreen = CurrentScreen.Saved
             )
         }
     }
@@ -123,10 +123,9 @@ class CountryDirectoryViewModel @Inject constructor(
         if (_uiState.value !is HomeUiState.Data) return
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
-            val response: Set<String> = favouritesRepository.getFavouriteCountries()
             _uiState.value = HomeUiState.Data(
                 repository.countries,
-                repository.regions, "All", response, currentScreen = CurrentScreen.All
+                repository.regions, "All", currentScreen = CurrentScreen.All
             )
         }
     }
@@ -135,10 +134,9 @@ class CountryDirectoryViewModel @Inject constructor(
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Data(
-        val countries: ImmutableList<CountryBasic>,
-        val regions: ImmutableList<String>,
+        val countries: SnapshotStateList<CountryBasic>,
+        val regions: SnapshotStateList<String>,
         val filter: String,
-        val saved: Set<String>,
         val currentScreen: CurrentScreen
     ) : HomeUiState
 

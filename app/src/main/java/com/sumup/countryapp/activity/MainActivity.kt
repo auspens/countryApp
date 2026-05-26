@@ -7,7 +7,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,9 +15,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
@@ -40,8 +36,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.sumup.countryapp.R
 import com.sumup.countryapp.datamodels.CountryBasic
@@ -82,7 +76,6 @@ class MainActivity : ComponentActivity() {
                                     selected = selected,
                                     onClick = {
                                         if (!selected) {
-                                            backStack.clear()
                                             backStack.add(item)
                                         }
                                     },
@@ -117,7 +110,7 @@ fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modif
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     when (state) {
         is HomeUiState.Data ->
-            CountriesList(state as HomeUiState.Data, viewModel, modifier, onShowAllCountriesClick)
+            CountriesList(state as HomeUiState.Data, modifier, onShowAllCountriesClick, onToggleFavourite = viewModel::toggleFavorite , onApplyFilter = viewModel::applyFilter)
 
         is HomeUiState.Loading -> Column(
             modifier = Modifier
@@ -238,7 +231,6 @@ fun CountryItemPreview() {
             modifier = Modifier,
             clickAction = {},
             toggleFavorites = {},
-            isFavourite = true
         )
     }
 }
