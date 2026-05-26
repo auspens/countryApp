@@ -6,8 +6,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.sumup.countryapp.activity.SavedScreen
-import com.sumup.countryapp.activity.HomePage
+import com.sumup.countryapp.activity.CountryDirectoryScreen
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 
 @Composable
@@ -19,10 +18,12 @@ fun NavigationRoot(backStack: NavBackStack<NavKey>,
         onBack = { backStack.removeLastOrNull() },
         entryProvider = entryProvider {
             entry<Home> {
-                HomePage(viewModel = viewModel, modifier)
+                viewModel.switchToAll()
+                CountryDirectoryScreen(viewModel = viewModel, modifier)
             }
             entry<Saved> {
-                SavedScreen(viewModel, modifier)
+                viewModel.switchToFavourites()
+                CountryDirectoryScreen(viewModel, modifier)
             }
         }
     )
