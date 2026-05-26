@@ -1,11 +1,11 @@
 package com.sumup.countryapp.activity
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 
 @Composable
-fun FavouritesScreen(viewModel: CountryDirectoryViewModel) {
+fun SavedScreen(viewModel: CountryDirectoryViewModel, modifier: Modifier) {
         viewModel.switchToFavourites()
-        CountryDirectoryScreen(viewModel = viewModel)
+        CountryDirectoryScreen(viewModel = viewModel, modifier)
 }

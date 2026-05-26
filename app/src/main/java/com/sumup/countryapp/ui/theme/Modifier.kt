@@ -22,7 +22,6 @@ fun Modifier.countryCard(onClick: () -> Unit = {}): Modifier = this
     .fillMaxWidth()
     .clickable(onClick = onClick)
     .padding(CountryDimens.cardPadding)
-    .background(MaterialTheme.colorScheme.surface)
 
 @Composable
 fun Modifier.countryCardRow(): Modifier = this

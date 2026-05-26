@@ -77,4 +77,4 @@ fun countryTopAppBarColors() = TopAppBarDefaults.topAppBarColors(
 )
 
 @Composable
-fun flagBorderColor(): Color = MaterialTheme.colorScheme.tertiary
+fun flagBorderColor(): Color = MaterialTheme.colorScheme.secondary

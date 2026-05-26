@@ -1,6 +1,5 @@
 package com.sumup.countryapp.activity
 
-import android.R.attr.padding
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,19 +7,14 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
@@ -47,9 +41,9 @@ import com.sumup.countryapp.R
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.FlagsDto
 import com.sumup.countryapp.datamodels.NameDto
-import com.sumup.countryapp.navigation.Favourites
 import com.sumup.countryapp.navigation.Home
 import com.sumup.countryapp.navigation.NavigationRoot
+import com.sumup.countryapp.navigation.Saved
 import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.ui.theme.CountryDimens
 import com.sumup.countryapp.ui.theme.countryButtonColors
@@ -68,7 +62,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CountryAppTheme {
-                val bottomNavItems = listOf(Home, Favourites)
+                val bottomNavItems = listOf(Home, Saved)
                 val backStack = rememberNavBackStack(Home)
                 Scaffold(
                     topBar = {
@@ -111,18 +105,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun HomePage(viewModel: CountryDirectoryViewModel){
-    viewModel.switchToAll()
-        CountryDirectoryScreen(viewModel = viewModel)
-}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel) {
+fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modifier = Modifier) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     when (state) {
         is HomeUiState.Data ->
-            CountriesList(state as HomeUiState.Data, viewModel)
+            CountriesList(state as HomeUiState.Data, viewModel, modifier)
 
         is HomeUiState.Loading -> Column(
             modifier = Modifier
@@ -143,44 +132,6 @@ fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel) {
     }
 }
 
-
-@Composable
-private fun CountriesList(
-
-    state: HomeUiState.Data,
-    viewModel: CountryDirectoryViewModel
-) {
-    Column(
-        modifier = Modifier
-            .padding(6.dp)
-            .fillMaxWidth(),
-    ) {
-        LazyRow() {
-            items(
-                items = (state).regions,
-                key = { item -> item.hashCode() }
-            ) { region ->
-                RegionFilterChip(
-                    region,
-                    (state).filter,
-                    { viewModel.applyFilter(region) })
-            }
-
-        }
-        LazyColumn() {
-            items(
-                items = (state).countries,
-                key = { item -> item.hashCode() },
-            ) { country ->
-                CountryItem(
-                    country = country, modifier = Modifier, clickAction = {},
-                    toggleFavorites = { viewModel.toggleFavorite(country.name?.common ?: "") },
-                    isFavourite = (state).favorites.contains(country.name?.common ?: "")
-                )
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -23,9 +23,10 @@ data object Home:  NavKey, BottomNavItem {
 }
 
 @Serializable
-data object Favourites: NavKey, BottomNavItem {
+data object Saved: NavKey, BottomNavItem {
      override val icon: ImageVector
          get() = Icons.Filled.Star
      override val title: String
-         get() = "Favourites"
+
+         get() = "Saved"
  }
