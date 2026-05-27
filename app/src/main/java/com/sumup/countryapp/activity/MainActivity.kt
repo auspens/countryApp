@@ -52,6 +52,8 @@ import com.sumup.countryapp.ui.theme.topBarTitleRow
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.HomeUiState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.runtime.collectAsState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -66,7 +68,7 @@ class MainActivity : ComponentActivity() {
                 val backStack = rememberNavBackStack(Home)
                 Scaffold(
                     topBar = {
-                        CountryTopAppBar(clickAction = {}, text = if(backStack[0]== Home) "World Atlas" else "Saved")
+                        CountryTopAppBar(clickAction = {}, text = if(backStack[0]== Saved) "Saved" else "World Atlas")
                     },
                     bottomBar = {
                         NavigationBar {
@@ -102,15 +104,20 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
+
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modifier = Modifier, onShowAllCountriesClick: () -> Unit = {}) {
+fun CountryDirectoryScreen(
+    viewModel: CountryDirectoryViewModel,
+    modifier: Modifier = Modifier,
+    onShowAllCountriesClick: () -> Unit = {},
+    onChooseCountryClick: (String)-> Unit) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     when (state) {
         is HomeUiState.Data ->
-            CountriesList(state as HomeUiState.Data, modifier, onShowAllCountriesClick, onToggleFavourite = viewModel::toggleFavorite , onApplyFilter = viewModel::applyFilter)
+            CountriesList(state as HomeUiState.Data, modifier, onShowAllCountriesClick, viewModel::toggleFavorite, viewModel::applyFilter, onChooseCountryClick)
 
         is HomeUiState.Loading -> Column(
             modifier = Modifier
@@ -130,6 +137,7 @@ fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modif
         )
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

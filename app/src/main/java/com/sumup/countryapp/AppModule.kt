@@ -28,7 +28,6 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "fa
 interface AppModule {
 
 
-
     @Binds
     @Singleton
     abstract fun provideCountryRepository(repo: CountryRepositoryImpl): CountryRepository
@@ -37,9 +36,7 @@ interface AppModule {
     @Singleton
     abstract fun provideFavouritesRepository(repo: FavouritesRepositoryImpl): FavouritesRepository
 
-    @Module
-    @InstallIn(SingletonComponent::class)
-    object AppModule {
+    companion object AppModule {
 
         @Provides
         @Singleton

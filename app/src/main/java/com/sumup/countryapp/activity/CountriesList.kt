@@ -31,7 +31,8 @@ internal fun CountriesList(
     modifier: Modifier,
     onShowAllCountriesClick: () -> Unit = {},
     onToggleFavourite: (String)-> Unit,
-    onApplyFilter: (String)-> Unit
+    onApplyFilter: (String)-> Unit,
+    onChooseCountryClick: (String)-> Unit,
 ) {
     if (state.countries.isEmpty()) {
         ListIsEmpty(modifier, onShowAllCountriesClick)
@@ -59,7 +60,7 @@ internal fun CountriesList(
                 key = { item -> item.hashCode() },
             ) { country ->
                 CountryItem(
-                    country = country, modifier = Modifier.Companion, clickAction = {},
+                    country = country, modifier = Modifier.Companion, clickAction = {onChooseCountryClick(country.name?.official ?:"")},
                     toggleFavorites = { onToggleFavourite(country.name?.common ?: "") }
                 )
             }

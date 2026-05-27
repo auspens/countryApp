@@ -5,6 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumup.countryapp.datamodels.CountryBasic
+import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.repository.CountryRepository
 import com.sumup.countryapp.repository.FavouritesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,9 @@ class CountryDirectoryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
 
+    private val _detailsUiState = MutableStateFlow<DetailsUiState>(DetailsUiState.Loading)
+    val detailsUiState: StateFlow<DetailsUiState> = _detailsUiState
+
     init {
         retryFetch()
     }
@@ -37,7 +41,11 @@ class CountryDirectoryViewModel @Inject constructor(
             val favorites = favouritesRepository.getFavouriteCountries()
             when {
                 response.isSuccess -> {
-                    repository.countries.apply { forEach { it.isFavourite = (favorites.contains(it.name?.common)) } }
+                    repository.countries.apply {
+                        forEach {
+                            it.isFavourite = (favorites.contains(it.name?.common))
+                        }
+                    }
                     _uiState.value =
                         HomeUiState.Data(
                             response.getOrDefault(SnapshotStateList()),
@@ -129,6 +137,30 @@ class CountryDirectoryViewModel @Inject constructor(
             )
         }
     }
+
+    fun switchToCountryDetails(name: String) {
+        viewModelScope.launch {
+            _detailsUiState.value = DetailsUiState.Loading
+            val response = repository.fetchCountryDetailsByName(name)
+            when {
+                response.isSuccess -> {
+                    val countryInfo = response.getOrNull()
+                    if (countryInfo != null) {
+                        _detailsUiState.value = DetailsUiState.Data(
+                            countryInfo,
+                            CurrentScreen.Details
+                        )
+                    }
+                    else {
+                        _detailsUiState.value = DetailsUiState.Error
+                    }
+                }
+                else -> {
+                    _detailsUiState.value = DetailsUiState.Error
+                }
+            }
+        }
+    }
 }
 
 sealed interface HomeUiState {
@@ -143,7 +175,19 @@ sealed interface HomeUiState {
     data object Error : HomeUiState
 }
 
+sealed interface DetailsUiState {
+    data object Loading : DetailsUiState
+    data class Data(
+        val countryInfo: CountryFull,
+        val currentScreen: CurrentScreen
+    ) : DetailsUiState
+    data object Error : DetailsUiState
+}
+
+
 sealed interface CurrentScreen {
     data object All : CurrentScreen
     data object Saved : CurrentScreen
+
+    data object Details : CurrentScreen
 }

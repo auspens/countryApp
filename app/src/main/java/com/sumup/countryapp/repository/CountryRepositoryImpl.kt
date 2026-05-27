@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import com.sumup.countryapp.datamodels.CountryBasic
+import com.sumup.countryapp.datamodels.CountryFull
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -58,6 +59,25 @@ class CountryRepositoryImpl @Inject constructor(
                 }
             }
 
-        return Result.failure(Exception("Reached the end of runcatching"))
+        return Result.failure(Exception("Reached the end of runCatching"))
+    }
+
+    override suspend fun fetchCountryDetailsByName(countryName: String): Result<CountryFull> {
+        runCatching {
+            withContext(Dispatchers.IO) {
+                countryAppApi.getCountryByName(countryName)
+            }
+        }.onFailure { exception -> return Result.failure(exception) }
+            .onSuccess { response ->
+                if (response.isSuccessful) {
+                    val countryResponse = response.body()
+                    return if (!countryResponse.isNullOrEmpty()) {
+                        Result.success(countryResponse[0])
+                    } else {
+                        Result.failure(Exception(response.errorBody().toString()))
+                    }
+                }
+        }
+        return Result.failure(Exception("Reached the end of runCatching"))
     }
 }
