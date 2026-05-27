@@ -1,6 +1,9 @@
 package com.sumup.countryapp.repository
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import com.sumup.countryapp.datamodels.CountryBasic
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -10,25 +13,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import kotlin.String
 import kotlin.collections.mutableSetOf
 
 
-class CountryRepositoryImpl(
+class CountryRepositoryImpl @Inject constructor(
     val countryAppApi: com.sumup.countryapp.api.CountryAppApi
 ) : CountryRepository {
-    private var _countries: ImmutableList<CountryBasic> =
-        emptyList<CountryBasic>().toImmutableList()
-    private var _regions: MutableList<String> = mutableListOf("All")
+    private var _countries: SnapshotStateList<CountryBasic> =
+        mutableStateListOf()
+    private var _regions: SnapshotStateList<String> = mutableStateListOf("All")
 
-    override val countries: ImmutableList<CountryBasic>
+    override val countries: SnapshotStateList<CountryBasic>
         get() = _countries
 
-    override val regions: ImmutableList<String>
-        get() = _regions.toImmutableList()
+    override val regions: SnapshotStateList<String>
+        get() = _regions
 
 
-    override suspend fun fetchCountriesAndRegions(): Result<ImmutableList<CountryBasic>> {
+    override suspend fun fetchCountriesAndRegions(): Result<SnapshotStateList<CountryBasic>> {
         val setOfRegions = mutableSetOf<String>()
 
         runCatching {
@@ -40,7 +44,7 @@ class CountryRepositoryImpl(
                 if (response.isSuccessful) {
                     val countryResponse = response.body()
                     if (countryResponse != null) {
-                        _countries = countryResponse.toImmutableList()
+                        _countries = countryResponse.toMutableStateList()
                         _countries.map { country ->
                             country.region?.let {
                                 setOfRegions.add(it)

@@ -24,7 +24,8 @@ private val LightColorScheme = lightColorScheme(
     onSurface = OnSurface,
     onSurfaceVariant = OnSurfaceMuted,
     outline = BorderDefault,
-    tertiary = BorderFlag,
+    tertiary = SelectedOrange,
+    onTertiary = BorderFlag,
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -36,13 +37,14 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = OnSurfaceDark,
     onSurfaceVariant = OnSurfaceMutedDark,
     outline = BorderDefaultDark,
-    tertiary = BorderFlagDark,
+    tertiary = SelectedOrange,
+    onTertiary = BorderFlagDark,
 )
 
 @Composable
 fun CountryAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
@@ -69,10 +71,12 @@ fun countryButtonColors() = ButtonDefaults.buttonColors(
     contentColor = MaterialTheme.colorScheme.onPrimary,
 )
 
+
+
 @Composable
 fun countryTopAppBarColors() = TopAppBarDefaults.topAppBarColors(
     containerColor = MaterialTheme.colorScheme.background,
 )
 
 @Composable
-fun flagBorderColor(): Color = MaterialTheme.colorScheme.tertiary
+fun flagBorderColor(): Color = MaterialTheme.colorScheme.secondary
