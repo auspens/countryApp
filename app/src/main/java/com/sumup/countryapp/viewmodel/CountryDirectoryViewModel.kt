@@ -134,10 +134,10 @@ class CountryDirectoryViewModel @Inject constructor(
         }
     }
 
-    fun switchToCountryDetails(name: String) {
+    fun switchToCountryDetails(cca2: String) {
         viewModelScope.launch {
             _detailsUiState.value = DetailsUiState.Loading
-            val response = repository.fetchCountryDetailsByName(name)
+            val response = repository.fetchCountryDetailsByCode(cca2)
             when {
                 response.isSuccess -> {
                     val countryInfo = response.getOrNull()

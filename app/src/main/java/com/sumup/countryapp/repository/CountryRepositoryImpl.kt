@@ -53,10 +53,10 @@ class CountryRepositoryImpl @Inject constructor(
         return Result.failure(Exception("Reached the end of runCatching"))
     }
 
-    override suspend fun fetchCountryDetailsByName(countryName: String): Result<CountryFull> {
+    override suspend fun fetchCountryDetailsByCode(cca2: String): Result<CountryFull> {
         runCatching {
             withContext(Dispatchers.IO) {
-                countryAppApi.getCountryByName(countryName)
+                countryAppApi.getCountryByCode(cca2)
             }
         }.onFailure { exception -> return Result.failure(exception) }
             .onSuccess { response ->
