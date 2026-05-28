@@ -17,7 +17,7 @@ fun NavigationRoot(
     modifier: Modifier = Modifier
 
 ) {
-    var countryName = ""
+    var cca2 = ""
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
@@ -27,7 +27,7 @@ fun NavigationRoot(
                 CountryDirectoryScreen(
                     viewModel, modifier,
                     onChooseCountryClick = {
-                        countryName = it
+                        cca2 = it
                         backStack.add(CountryDetails)
                     })
             }
@@ -38,16 +38,16 @@ fun NavigationRoot(
                         backStack.add(Home)
                     },
                     onChooseCountryClick = {
-                        countryName = it
+                        cca2 = it
                         backStack.add(CountryDetails)
                     })
             }
             entry<CountryDetails> {
-                viewModel.switchToCountryDetails(countryName)
+                viewModel.switchToCountryDetails(cca2)
                 CountryDetailsScreen(viewModel, modifier,
                     toggleFavourites = {
                     viewModel.toggleFavoriteInDetails(
-                        countryName
+                        cca2
                     )
                 })
             }

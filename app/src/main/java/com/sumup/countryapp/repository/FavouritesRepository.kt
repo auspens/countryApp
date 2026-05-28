@@ -10,8 +10,8 @@ import javax.inject.Inject
 
 interface FavouritesRepository {
     suspend fun getFavouriteCountries(): Set<String>
-    suspend fun addToFavourites(countryName: String)
-    suspend fun removeFromFavourites(countryName: String)
+    suspend fun addToFavourites(cca2: String)
+    suspend fun removeFromFavourites(cca2: String)
 }
 
 class FavouritesRepositoryImpl @Inject constructor(private val dataStore: DataStore<Preferences>) :
@@ -29,17 +29,17 @@ class FavouritesRepositoryImpl @Inject constructor(private val dataStore: DataSt
 
     }
 
-    override suspend fun addToFavourites(countryName: String) {
+    override suspend fun addToFavourites(cca2: String) {
         val currentFavs = getFavouriteCountries().toMutableSet()
-        currentFavs.add(countryName)
+        currentFavs.add(cca2)
         dataStore.edit {
             it[KEY_NAME] = currentFavs
         }
     }
 
-    override suspend fun removeFromFavourites(countryName: String) {
+    override suspend fun removeFromFavourites(cca2: String) {
         val currentFavs = getFavouriteCountries().toMutableSet()
-        currentFavs.remove(countryName)
+        currentFavs.remove(cca2)
         dataStore.edit {
             it[KEY_NAME] = currentFavs
         }

@@ -1,22 +1,13 @@
 package com.sumup.countryapp.repository
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.CountryFull
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.String
-import kotlin.collections.mutableSetOf
 
 
 class CountryRepositoryImpl @Inject constructor(
@@ -38,7 +29,7 @@ class CountryRepositoryImpl @Inject constructor(
 
         runCatching {
             withContext(Dispatchers.IO) {
-                countryAppApi.getCountries("name,flags,region")
+                countryAppApi.getCountries("cca2,name,flags,region")
             }
         }.onFailure { exception -> return Result.failure(exception) }
             .onSuccess { response ->

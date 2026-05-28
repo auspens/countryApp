@@ -21,8 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.sumup.countryapp.R
 import com.sumup.countryapp.ui.theme.Brown
-import com.sumup.countryapp.ui.theme.countryButtonColors
-import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.HomeUiState
 
 @Composable
@@ -57,11 +55,11 @@ internal fun CountriesList(
         LazyColumn() {
             items(
                 items = (state).countries,
-                key = { item -> item.hashCode() },
+                key = { item -> item.cca2 },
             ) { country ->
                 CountryItem(
-                    country = country, modifier = Modifier.Companion, clickAction = {onChooseCountryClick(country.name?.official ?:"")},
-                    toggleFavorites = { onToggleFavourite(country.name?.common ?: "") }
+                    country = country, modifier = Modifier.Companion, clickAction = {onChooseCountryClick(country.cca2)},
+                    toggleFavorites = { onToggleFavourite(country.cca2) }
                 )
             }
         }

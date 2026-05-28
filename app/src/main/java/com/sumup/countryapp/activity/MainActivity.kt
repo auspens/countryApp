@@ -52,8 +52,6 @@ import com.sumup.countryapp.ui.theme.topBarTitleRow
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.HomeUiState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.StateFlow
-import androidx.compose.runtime.collectAsState
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -229,6 +227,7 @@ private fun ErrorScreen(modifier: Modifier, retry: () -> Unit) {
 @Composable
 fun CountryItemPreview() {
     val country = CountryBasic(
+        cca2 = "DE",
         region = "Europe",
         name = NameDto(common = "Germany", official = "Federal Republic of Germany"),
         flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"),
