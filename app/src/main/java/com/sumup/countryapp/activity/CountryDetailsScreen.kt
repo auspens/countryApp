@@ -1,8 +1,6 @@
 package com.sumup.countryapp.activity
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -13,12 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,42 +24,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.painter.BrushPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.util.rangeTo
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.sumup.countryapp.datamodels.CoatOfArmsDto
 import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.datamodels.CurrencyDto
 import com.sumup.countryapp.datamodels.NameDto
-import com.sumup.countryapp.navigation.CountryDetails
 import com.sumup.countryapp.ui.theme.CountryAppTheme
-import com.sumup.countryapp.ui.theme.FlagPlaceholderEnd
-import com.sumup.countryapp.ui.theme.FlagPlaceholderStart
-import com.sumup.countryapp.ui.theme.OnSurfaceDimDark
-import com.sumup.countryapp.ui.theme.SurfaceCard
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.DetailsUiState
 
 @Composable
 internal fun CountryDetailsScreen(
     viewModel: CountryDirectoryViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    toggleFavourites: () -> Unit
 ) {
     val state by viewModel.detailsUiState.collectAsStateWithLifecycle()
     when (state) {
         is DetailsUiState.Data -> {
             CountryDetails(
                 countryInfo = (state as DetailsUiState.Data).countryInfo,
-                modifier = modifier
+                modifier = modifier,
+                toggleFavourites = toggleFavourites
             )
         }
-
         is DetailsUiState.Loading -> Text(text = "Loading...")
         else -> Text(text = "Error loading country details")
     }
@@ -73,7 +60,7 @@ internal fun CountryDetailsScreen(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier) {
+fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier, toggleFavourites: () -> Unit) {
     LazyColumn(
         modifier
             .paint(
@@ -94,8 +81,9 @@ fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier) {
                     .padding(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
-            ) ){
-                Column(){
+                )
+            ) {
+                Column() {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -128,7 +116,7 @@ fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier) {
                             }
                         }
                         IconButton(
-                            onClick = {},
+                            onClick = toggleFavourites,
                             modifier = Modifier
                                 .padding(start = 16.dp)
                                 .align(Alignment.Top)
@@ -137,7 +125,7 @@ fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier) {
                             Icon(
                                 imageVector = Icons.Filled.FavoriteBorder,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = if(countryInfo.isFavourite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -158,7 +146,7 @@ fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier) {
                             title = "POPULATION",
                             content = if (countryInfo.population != null) String.format(
                                 "%.1f",
-                                (countryInfo.population ?: 1) / 1000000f
+                                (countryInfo.population) / 1000000f
                             ) + "M" else "Unknown",
                             modifier = Modifier
                                 .weight(1f)
@@ -189,22 +177,30 @@ fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier) {
                 }
             }
         }
-        item { CountryDescription(title = "About ${countryInfo.name?.common}", content = "some description") }
+        item {
+            CountryDescription(
+                title = "About ${countryInfo.name?.common}",
+                content = "some description"
+            )
+        }
 
     }
 }
 
 @Composable
 internal fun CountryDescription(title: String, content: String, modifier: Modifier = Modifier) {
-    Card(modifier = modifier.padding(8.dp),
+    Card(
+        modifier = modifier.padding(8.dp),
         colors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-    )
-    ){
-        Column(modifier = modifier
-            .padding(16.dp)
-            .fillMaxWidth()) {
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        )
+    ) {
+        Column(
+            modifier = modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
@@ -222,13 +218,16 @@ internal fun CountryDescription(title: String, content: String, modifier: Modifi
 
 @Composable
 internal fun InfoCard(title: String, content: String, modifier: Modifier = Modifier) {
-    Card(modifier = modifier.padding(8.dp),
+    Card(
+        modifier = modifier.padding(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurface,
-        ),){
-        Column(modifier = Modifier.padding(16.dp)
-           ) {
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
@@ -247,7 +246,7 @@ internal fun InfoCard(title: String, content: String, modifier: Modifier = Modif
 @Preview(showBackground = true)
 @Composable
 fun CountryDetailsPreview() {
-    CountryAppTheme(){
+    CountryAppTheme() {
         CountryDetails(
             countryInfo = CountryFull(
                 name = NameDto(
@@ -266,7 +265,8 @@ fun CountryDetailsPreview() {
                         symbol = "€"
                     )
                 )
-            )
+            ),
+            toggleFavourites = {}
         )
     }
 }

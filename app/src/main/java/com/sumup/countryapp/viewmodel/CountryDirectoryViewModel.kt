@@ -9,12 +9,8 @@ import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.repository.CountryRepository
 import com.sumup.countryapp.repository.FavouritesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -146,6 +142,10 @@ class CountryDirectoryViewModel @Inject constructor(
                 response.isSuccess -> {
                     val countryInfo = response.getOrNull()
                     if (countryInfo != null) {
+                        val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
+                        if (savedList.contains(countryInfo.name?.common)) {
+                            countryInfo.isFavourite = true
+                        }
                         _detailsUiState.value = DetailsUiState.Data(
                             countryInfo,
                             CurrentScreen.Details
@@ -159,6 +159,18 @@ class CountryDirectoryViewModel @Inject constructor(
                     _detailsUiState.value = DetailsUiState.Error
                 }
             }
+        }
+    }
+
+    fun toggleFavoriteInDetails(countryName: String) {
+        if (_detailsUiState.value !is DetailsUiState.Data) return
+        viewModelScope.launch {
+            toggleFavorite(countryName)
+            val currentDetails = _detailsUiState.value as DetailsUiState.Data
+            _detailsUiState.value = DetailsUiState.Data(
+                currentDetails.countryInfo.copy(isFavourite = !currentDetails.countryInfo.isFavourite),
+                currentDetails.currentScreen
+            )
         }
     }
 }

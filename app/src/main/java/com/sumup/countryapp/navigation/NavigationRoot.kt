@@ -44,7 +44,12 @@ fun NavigationRoot(
             }
             entry<CountryDetails> {
                 viewModel.switchToCountryDetails(countryName)
-                CountryDetailsScreen(viewModel, modifier)
+                CountryDetailsScreen(viewModel, modifier,
+                    toggleFavourites = {
+                    viewModel.toggleFavoriteInDetails(
+                        countryName
+                    )
+                })
             }
         }
     )

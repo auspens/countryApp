@@ -44,7 +44,7 @@ data class CountryFull(
     val capitalInfo: CapitalInfoDto? = null,
     val postalCode: PostalCodeDto? = null,
 
-    val isFavourite: Boolean = false
+    var isFavourite: Boolean = false
 )
 
 data class IddDto(
