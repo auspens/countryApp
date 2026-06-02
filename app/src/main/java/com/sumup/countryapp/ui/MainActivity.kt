@@ -4,21 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,7 +36,6 @@ import com.sumup.countryapp.navigation.NavigationRoot
 import com.sumup.countryapp.navigation.Saved
 import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.ui.theme.CountryDimens
-import com.sumup.countryapp.ui.theme.countryButtonColors
 import com.sumup.countryapp.ui.theme.countryTopAppBarColors
 import com.sumup.countryapp.ui.theme.topBarTitleRow
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
@@ -66,7 +55,11 @@ class MainActivity : ComponentActivity() {
                 val backStack = rememberNavBackStack(Home)
                 Scaffold(
                     topBar = {
-                        CountryTopAppBar(clickAction = {}, text = if(backStack[0]== Saved) "Saved" else "World Atlas")
+                        TopBar(
+                            icon = { GlobeIcon() },
+                            clickAction = {},
+                            text = if (backStack[0] == Saved) "Saved" else "World Atlas"
+                        )
                     },
                     bottomBar = {
                         NavigationBar {
@@ -105,17 +98,26 @@ class MainActivity : ComponentActivity() {
 
 
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CountryDirectoryScreen(
     viewModel: CountryDirectoryViewModel,
     modifier: Modifier = Modifier,
     onShowAllCountriesClick: () -> Unit = {},
-    onChooseCountryClick: (String)-> Unit) {
+    onChooseCountryClick: (String) -> Unit
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     when (state) {
         is HomeUiState.Data ->
-            CountriesList(state as HomeUiState.Data, modifier, onShowAllCountriesClick, viewModel::toggleFavorite, viewModel::applyFilter, onChooseCountryClick)
+            CountriesList(
+                state as HomeUiState.Data,
+                modifier,
+                onShowAllCountriesClick,
+                viewModel::toggleFavorite,
+                viewModel::applyFilter,
+                onChooseCountryClick
+            )
 
         is HomeUiState.Loading -> LoadingPage()
 
@@ -129,7 +131,7 @@ fun CountryDirectoryScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
+fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
     TopAppBar(
         colors = countryTopAppBarColors(),
         windowInsets = WindowInsets(

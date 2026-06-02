@@ -65,7 +65,6 @@ internal fun CountryDetailsScreen(
         }
 
         is DetailsUiState.Loading -> LoadingPage()
-
         else -> ErrorPage(
             modifier = Modifier.padding(6.dp),
             retry = retry

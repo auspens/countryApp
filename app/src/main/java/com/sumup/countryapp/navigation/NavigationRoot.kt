@@ -1,14 +1,18 @@
 package com.sumup.countryapp.navigation
 
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.sumup.countryapp.ui.CountryDetailsActivity
 import com.sumup.countryapp.ui.CountryDetailsScreen
 import com.sumup.countryapp.ui.CountryDirectoryScreen
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun NavigationRoot(
@@ -17,6 +21,7 @@ fun NavigationRoot(
     modifier: Modifier = Modifier
 
 ) {
+    val context = LocalContext.current
     var cca2 = ""
     NavDisplay(
         backStack = backStack,
@@ -43,16 +48,9 @@ fun NavigationRoot(
                     })
             }
             entry<CountryDetails> {
-                viewModel.switchToCountryDetails(cca2)
-                CountryDetailsScreen(viewModel, modifier,
-                    toggleFavourites = {
-                    viewModel.toggleFavoriteInDetails(
-                        cca2
-                    )
-                },
-                    retry = {
-                        viewModel.switchToCountryDetails(cca2)
-                    })
+                val countryScreenIntent = Intent(context, CountryDetailsActivity::class.java)
+                    .putExtra("cca2", cca2)
+                context.startActivity(countryScreenIntent)
             }
         }
     )
