@@ -1,6 +1,7 @@
-package com.sumup.countryapp.activity
+package com.sumup.countryapp.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -9,13 +10,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +40,6 @@ import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.datamodels.CurrencyDto
 import com.sumup.countryapp.datamodels.NameDto
 import com.sumup.countryapp.ui.theme.CountryAppTheme
-import com.sumup.countryapp.ui.theme.CountryDimens
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.DetailsUiState
 
@@ -57,7 +58,21 @@ internal fun CountryDetailsScreen(
                 toggleFavourites = toggleFavourites
             )
         }
-        is DetailsUiState.Loading -> Text(text = "Loading...")
+
+        is DetailsUiState.Loading -> {
+            Column(
+                modifier = Modifier
+                    .padding(6.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.size(125.dp))
+                CircularProgressIndicator()
+                Text("Loading...")
+            }
+        }
+
         else -> Text(text = "Error loading country details")
     }
 
@@ -65,7 +80,11 @@ internal fun CountryDetailsScreen(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier, toggleFavourites: () -> Unit) {
+fun CountryDetails(
+    countryInfo: CountryFull,
+    modifier: Modifier = Modifier,
+    toggleFavourites: () -> Unit
+) {
     LazyColumn(
         modifier
             .paint(
@@ -120,19 +139,7 @@ fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier, togg
                                 )
                             }
                         }
-                        IconButton(
-                            onClick = toggleFavourites,
-                            modifier = Modifier
-                                .padding(start = 16.dp)
-                                .align(Alignment.Top)
-                        )
-                        {
-                            Icon(
-                                painter = if(countryInfo.isFavourite)rememberVectorPainter(Icons.Filled.Star) else painterResource(R.drawable.ic_star_outlined),
-                                contentDescription = null,
-                                tint = if(countryInfo.isFavourite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        FavouritesIcon(toggleFavourites, countryInfo.isFavourite)
                     }
                 }
                 Column(modifier = Modifier.padding(16.dp)) {

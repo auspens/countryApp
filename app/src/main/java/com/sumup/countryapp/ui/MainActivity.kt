@@ -1,4 +1,4 @@
-package com.sumup.countryapp.activity
+package com.sumup.countryapp.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

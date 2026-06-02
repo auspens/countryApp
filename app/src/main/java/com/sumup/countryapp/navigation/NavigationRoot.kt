@@ -6,8 +6,8 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.sumup.countryapp.activity.CountryDetailsScreen
-import com.sumup.countryapp.activity.CountryDirectoryScreen
+import com.sumup.countryapp.ui.CountryDetailsScreen
+import com.sumup.countryapp.ui.CountryDirectoryScreen
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 
 @Composable

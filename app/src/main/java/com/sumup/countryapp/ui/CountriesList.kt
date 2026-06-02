@@ -1,4 +1,4 @@
-package com.sumup.countryapp.activity
+package com.sumup.countryapp.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
