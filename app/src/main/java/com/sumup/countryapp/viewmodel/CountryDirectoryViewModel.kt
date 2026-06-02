@@ -1,5 +1,6 @@
 package com.sumup.countryapp.viewmodel
 
+import android.content.Intent
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
@@ -8,17 +9,21 @@ import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.repository.CountryRepository
 import com.sumup.countryapp.repository.FavouritesRepository
+import com.sumup.countryapp.ui.CountryDetailsActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
 
 
 @HiltViewModel
 class CountryDirectoryViewModel @Inject constructor(
     private val repository: CountryRepository,
-    private val favouritesRepository: FavouritesRepository
+    private val favouritesRepository: FavouritesRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
@@ -150,16 +155,17 @@ class CountryDirectoryViewModel @Inject constructor(
                             countryInfo,
                             CurrentScreen.Details
                         )
-                    }
-                    else {
+                    } else {
                         _detailsUiState.value = DetailsUiState.Error
                     }
                 }
+
                 else -> {
                     _detailsUiState.value = DetailsUiState.Error
                 }
             }
         }
+
     }
 
     fun toggleFavoriteInDetails(cca2: String) {

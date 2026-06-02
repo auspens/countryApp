@@ -30,9 +30,3 @@ data object Saved: NavKey, BottomNavItem {
 
          get() = "Saved"
  }
-
-@Serializable
-data object CountryDetails: NavKey {
-    val key: String
-        get() = "country_details"
-}

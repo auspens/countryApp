@@ -31,9 +31,8 @@ fun NavigationRoot(
                 viewModel.switchToAll()
                 CountryDirectoryScreen(
                     viewModel, modifier,
-                    onChooseCountryClick = {
-                        cca2 = it
-                        backStack.add(CountryDetails)
+                    onChooseCountryClick = {cca2 ->
+                        onChooseCountryClick(cca2, context)
                     })
             }
             entry<Saved> {
@@ -42,16 +41,15 @@ fun NavigationRoot(
                     viewModel, modifier, onShowAllCountriesClick = {
                         backStack.add(Home)
                     },
-                    onChooseCountryClick = {
-                        cca2 = it
-                        backStack.add(CountryDetails)
-                    })
+                    onChooseCountryClick = { cca2 -> onChooseCountryClick(cca2, context) }
+                    )
             }
-            entry<CountryDetails> {
-                val countryScreenIntent = Intent(context, CountryDetailsActivity::class.java)
-                    .putExtra("cca2", cca2)
-                context.startActivity(countryScreenIntent)
-            }
+
         }
     )
+}
+fun onChooseCountryClick(cca2: String, context: Context) {
+    val countryScreenIntent = Intent(context, CountryDetailsActivity::class.java)
+        .putExtra("cca2", cca2)
+    context.startActivity(countryScreenIntent)
 }

@@ -25,11 +25,12 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class CountryDetailsActivity : ComponentActivity() {
+    val viewModel: CountryDirectoryViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle? ) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val cca2:String = intent.getStringExtra("cca2") ?: ""
-        val viewModel: CountryDirectoryViewModel by viewModels()
         viewModel.switchToCountryDetails(cca2)
         setContent {
             CountryAppTheme {
