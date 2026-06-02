@@ -47,7 +47,8 @@ import com.sumup.countryapp.viewmodel.DetailsUiState
 internal fun CountryDetailsScreen(
     viewModel: CountryDirectoryViewModel,
     modifier: Modifier = Modifier,
-    toggleFavourites: () -> Unit
+    toggleFavourites: () -> Unit,
+    retry: () -> Unit
 ) {
     val state by viewModel.detailsUiState.collectAsStateWithLifecycle()
     when (state) {
@@ -59,21 +60,10 @@ internal fun CountryDetailsScreen(
             )
         }
 
-        is DetailsUiState.Loading -> {
-            Column(
-                modifier = Modifier
-                    .padding(6.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.size(125.dp))
-                CircularProgressIndicator()
-                Text("Loading...")
-            }
-        }
+        is DetailsUiState.Loading -> LoadingPage()
 
-        else -> Text(text = "Error loading country details")
+        else -> ErrorPage(modifier = Modifier.padding(6.dp),
+            retry = retry)
     }
 
 }

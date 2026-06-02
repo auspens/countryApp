@@ -49,7 +49,10 @@ fun NavigationRoot(
                     viewModel.toggleFavoriteInDetails(
                         cca2
                     )
-                })
+                },
+                    retry = {
+                        viewModel.switchToCountryDetails(cca2)
+                    })
             }
         }
     )

@@ -117,19 +117,9 @@ fun CountryDirectoryScreen(
         is HomeUiState.Data ->
             CountriesList(state as HomeUiState.Data, modifier, onShowAllCountriesClick, viewModel::toggleFavorite, viewModel::applyFilter, onChooseCountryClick)
 
-        is HomeUiState.Loading -> Column(
-            modifier = Modifier
-                .padding(6.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.size(125.dp))
-            CircularProgressIndicator()
-            Text("Loading...")
-        }
+        is HomeUiState.Loading -> LoadingPage()
 
-        else -> ErrorScreen(
+        else -> ErrorPage(
             modifier = Modifier.padding(6.dp),
             retry = { viewModel.retryFetch() },
         )
@@ -180,49 +170,6 @@ private fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
     )
 }
 
-
-@Composable
-private fun ErrorScreen(modifier: Modifier, retry: () -> Unit) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(CountryDimens.errorSpacing),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .padding(CountryDimens.contentPadding)
-            .fillMaxWidth(),
-    ) {
-        Image(
-            painter = painterResource(R.drawable.ic_error),
-            contentDescription = null,
-            modifier = Modifier.aspectRatio(1f),
-        )
-        Text(
-            text = "Something went wrong",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = "We couldn't load the country list.\n" +
-                    "Please check your connection and\n" +
-                    "try again.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Button(
-            onClick = retry,
-            modifier = Modifier.defaultMinSize(minWidth = CountryDimens.retryButtonMinWidth),
-            colors = countryButtonColors(),
-            content = {
-                Icon(Icons.Outlined.Refresh, contentDescription = null)
-                Text(
-                    text = "Retry",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            },
-        )
-    }
-}
-
-
 @Preview(showBackground = true)
 @Composable
 fun CountryItemPreview() {
@@ -246,7 +193,7 @@ fun CountryItemPreview() {
 @Composable
 fun ErrorScreenPreview() {
     CountryAppTheme {
-        ErrorScreen(modifier = Modifier, retry = {})
+        ErrorPage(modifier = Modifier, retry = {})
     }
 }
 
