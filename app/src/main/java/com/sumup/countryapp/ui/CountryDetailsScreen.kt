@@ -1,6 +1,8 @@
 package com.sumup.countryapp.ui
 
+import android.R.attr.background
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +14,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.LocationOn
@@ -32,9 +38,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.rememberAsyncImagePainter
@@ -75,32 +85,27 @@ internal fun CountryDetailsScreen(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun CountryDetails(
+internal fun CountryDetails(
     countryInfo: CountryFull,
     modifier: Modifier = Modifier,
     toggleFavourites: () -> Unit
 ) {
-    val headerHeight = 220.dp
-    val headerOverlap = 60.dp
-    Box(
-        modifier = modifier.fillMaxWidth())
-    {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(headerHeight)
-                .align(Alignment.TopCenter),
-            contentAlignment = Alignment.Center
-        ) {
+    val scrollState = rememberScrollState()
+    Column(modifier
+        .fillMaxSize()
+        .verticalScroll(scrollState)
+        .background(MaterialTheme.colorScheme.surfaceVariant)) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
             SubcomposeAsyncImage(
                 model = countryInfo.coatOfArms?.png,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit, // or Crop if you prefer consistent fill
+                modifier = Modifier.fillMaxWidth().height(screenHeight * 0.5f),
+                contentScale = ContentScale.Fit,
                 alignment = Alignment.TopCenter,
                 loading = {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(32.dp), // fixed indicator size
+                        modifier = Modifier.size(32.dp),
                         strokeWidth = 3.dp
                     )
                 },
@@ -109,111 +114,117 @@ fun CountryDetails(
                 }
             )
         }
-
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(top = headerHeight - headerOverlap)
+        Card (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
+                .offset(y = (-16).dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
-                ) {
-                    Column() {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    "COUNTRY PROFILE",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 6.dp)
-                                )
-                                Text(
-                                    countryInfo.name?.common ?: "",
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    modifier = Modifier.padding(bottom = 6.dp)
-                                )
-                                Row(modifier = Modifier.padding(bottom = 6.dp)) {
-                                    Icon(
-                                        Icons.Outlined.LocationOn,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        countryInfo.region ?: "Unknown",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        modifier = Modifier
-                                            .padding(start = 4.dp)
-                                            .align(Alignment.Bottom)
-                                    )
-                                }
-                            }
-                            FavouritesIcon(toggleFavourites, countryInfo.isFavourite)
-                        }
+            ConstraintLayout(
+                modifier = Modifier.fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                val (
+                    profile, name, regionIcon, region, capital, population, currency, description, favoritesIcon
+                ) = createRefs()
+                Text(
+                    "COUNTRY PROFILE",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.constrainAs(profile) {
+                        top.linkTo(parent.top, margin = 16.dp)
+                        start.linkTo(parent.start, margin = 16.dp)
                     }
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(IntrinsicSize.Max)
-                        ) {
-                            InfoCard(
-                                title = "CAPITAL",
-                                content = countryInfo.capital?.getOrNull(0) ?: "",
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                            )
-                            InfoCard(
-                                title = "POPULATION",
-                                content = if (countryInfo.population != null) String.format(
-                                    "%.1f",
-                                    (countryInfo.population) / 1000000f
-                                ) + "M" else "Unknown",
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                            )
-                        }
-                        Row(
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .height(IntrinsicSize.Max)
-                        ) {
-                            InfoCard(
-                                title = "CURRENCY",
-                                content = countryInfo.currencies?.map { (string, dto) ->
-                                    "${dto.name} (${dto.symbol})"
-                                }?.joinToString("/n") ?: "",
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
-                            )
-                            InfoCard(
-                                title = "REGION", content = countryInfo.region ?: "",
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight(),
-                            )
-                        }
+                )
+                Text(
+                    countryInfo.name?.common ?: "",
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.constrainAs(name) {
+                        top.linkTo(profile.bottom, margin = 6.dp)
+                        start.linkTo(parent.start, margin = 16.dp)
                     }
-                }
-            }
-            item {
-                CountryDescription(
-                    title = "About ${countryInfo.name?.common}",
-                    content = "some description"
+                )
+                Icon(
+                    Icons.Outlined.LocationOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.constrainAs(regionIcon) {
+                        top.linkTo(name.bottom, margin = 6.dp)
+                        start.linkTo(parent.start, margin = 16.dp)
+                    }
+                )
+                Text(
+                    countryInfo.region ?: "Unknown",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.constrainAs(region) {
+                        bottom.linkTo(regionIcon.bottom)
+                        start.linkTo(regionIcon.end, margin = 4.dp)
+                    }
+                )
+                FavouritesIcon(
+                    toggleFavourites,
+                    countryInfo.isFavourite,
+                    modifier = Modifier.constrainAs(favoritesIcon) {
+                        top.linkTo(name.top)
+                        end.linkTo(parent.end, margin = 16.dp)
+                    })
+                InfoCard(
+                    title = "CAPITAL",
+                    content = countryInfo.capital?.getOrNull(0) ?: "",
+                    modifier = Modifier.constrainAs(capital) {
+                        top.linkTo(regionIcon.bottom, margin = 8.dp)
+                        start.linkTo(parent.start, margin = 16.dp)
+                        end.linkTo(population.start, margin = 8.dp)
+                        width = Dimension.fillToConstraints
+                    }
+                )
+                InfoCard(
+                    title = "POPULATION",
+                    content = if (countryInfo.population != null) String.format(
+                        "%.1f",
+                        (countryInfo.population) / 1000000f
+                    ) + "M" else "Unknown",
+                    modifier = Modifier.constrainAs(population) {
+                        top.linkTo(regionIcon.bottom, margin = 8.dp)
+                        start.linkTo(capital.end, margin = 8.dp)
+                        end.linkTo(parent.end, margin = 16.dp)
+                        width = Dimension.fillToConstraints
+                    }
+                )
+                InfoCard(
+                    title = "CURRENCY",
+                    content = countryInfo.currencies?.map { (string, dto) ->
+                        "${dto.name} (${dto.symbol})"
+                    }?.joinToString("/n") ?: "",
+                    modifier = Modifier.constrainAs(currency) {
+                        top.linkTo(capital.bottom, margin = 8.dp)
+                        start.linkTo(parent.start, margin = 16.dp)
+                        end.linkTo(population.start, margin = 8.dp)
+                        width = Dimension.fillToConstraints
+                    }
+                )
+                InfoCard(
+                    title = "REGION", content = countryInfo.region ?: "",
+                    modifier = Modifier.constrainAs(description) {
+                        top.linkTo(capital.bottom, margin = 8.dp)
+                        start.linkTo(currency.end, margin = 8.dp)
+                        end.linkTo(parent.end, margin = 16.dp)
+                        width = Dimension.fillToConstraints
+                    }
                 )
             }
+
         }
+        CountryDescription(
+            title = "About ${countryInfo.name?.common}",
+            content = "some description"
+        )
     }
 }
 

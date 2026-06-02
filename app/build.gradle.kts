@@ -94,4 +94,5 @@ dependencies {
     implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.constraintlayout.compose)
 }
