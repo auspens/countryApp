@@ -1,30 +1,35 @@
 package com.sumup.countryapp.viewmodel
 
+import android.content.Intent
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumup.countryapp.datamodels.CountryBasic
+import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.repository.CountryRepository
 import com.sumup.countryapp.repository.FavouritesRepository
+import com.sumup.countryapp.ui.CountryDetailsActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
 
 
 @HiltViewModel
 class CountryDirectoryViewModel @Inject constructor(
     private val repository: CountryRepository,
-    private val favouritesRepository: FavouritesRepository
+    private val favouritesRepository: FavouritesRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
+
+    private val _detailsUiState = MutableStateFlow<DetailsUiState>(DetailsUiState.Loading)
+    val detailsUiState: StateFlow<DetailsUiState> = _detailsUiState
 
     init {
         retryFetch()
@@ -37,7 +42,11 @@ class CountryDirectoryViewModel @Inject constructor(
             val favorites = favouritesRepository.getFavouriteCountries()
             when {
                 response.isSuccess -> {
-                    repository.countries.apply { forEach { it.isFavourite = (favorites.contains(it.name?.common)) } }
+                    repository.countries.apply {
+                        forEach {
+                            it.isFavourite = (favorites.contains(it.countryCode))
+                        }
+                    }
                     _uiState.value =
                         HomeUiState.Data(
                             response.getOrDefault(SnapshotStateList()),
@@ -90,18 +99,18 @@ class CountryDirectoryViewModel @Inject constructor(
         }
     }
 
-    fun toggleFavorite(countryName: String) {
+    fun toggleFavorite(countryCode: String) {
         if (_uiState.value !is HomeUiState.Data) return
         viewModelScope.launch {
             val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
-            if (savedList.contains(countryName)) {
-                favouritesRepository.removeFromFavourites(countryName)
-                val index = repository.countries.indexOfFirst { it.name?.common == countryName }
+            if (savedList.contains(countryCode)) {
+                favouritesRepository.removeFromFavourites(countryCode)
+                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
                 repository.countries[index] = repository.countries[index].copy(isFavourite = false)
                 applyFilter((_uiState.value as HomeUiState.Data).filter)
             } else {
-                favouritesRepository.addToFavourites(countryName)
-                val index = repository.countries.indexOfFirst { it.name?.common == countryName }
+                favouritesRepository.addToFavourites(countryCode)
+                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
                 repository.countries[index] = repository.countries[index].copy(isFavourite = true)
                 applyFilter((_uiState.value as HomeUiState.Data).filter)
             }
@@ -129,6 +138,47 @@ class CountryDirectoryViewModel @Inject constructor(
             )
         }
     }
+
+    fun switchToCountryDetails(countryCode: String) {
+        viewModelScope.launch {
+            _detailsUiState.value = DetailsUiState.Loading
+            val response = repository.fetchCountryDetailsByCode(countryCode)
+            when {
+                response.isSuccess -> {
+                    val countryInfo = response.getOrNull()
+                    if (countryInfo != null) {
+                        val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
+                        if (savedList.contains(countryInfo.countryCode)) {
+                            countryInfo.isFavourite = true
+                        }
+                        _detailsUiState.value = DetailsUiState.Data(
+                            countryInfo,
+                            CurrentScreen.Details
+                        )
+                    } else {
+                        _detailsUiState.value = DetailsUiState.Error
+                    }
+                }
+
+                else -> {
+                    _detailsUiState.value = DetailsUiState.Error
+                }
+            }
+        }
+
+    }
+
+    fun toggleFavoriteInDetails(countryCode: String) {
+        if (_detailsUiState.value !is DetailsUiState.Data) return
+        viewModelScope.launch {
+            toggleFavorite(countryCode)
+            val currentDetails = _detailsUiState.value as DetailsUiState.Data
+            _detailsUiState.value = DetailsUiState.Data(
+                currentDetails.countryInfo.copy(isFavourite = !currentDetails.countryInfo.isFavourite),
+                currentDetails.currentScreen
+            )
+        }
+    }
 }
 
 sealed interface HomeUiState {
@@ -143,7 +193,19 @@ sealed interface HomeUiState {
     data object Error : HomeUiState
 }
 
+sealed interface DetailsUiState {
+    data object Loading : DetailsUiState
+    data class Data(
+        val countryInfo: CountryFull,
+        val currentScreen: CurrentScreen
+    ) : DetailsUiState
+    data object Error : DetailsUiState
+}
+
+
 sealed interface CurrentScreen {
     data object All : CurrentScreen
     data object Saved : CurrentScreen
+
+    data object Details : CurrentScreen
 }

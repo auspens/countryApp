@@ -1,8 +1,10 @@
 package com.sumup.countryapp.datamodels
 
-data class CountryFull(
+import com.google.gson.annotations.SerializedName
 
-    val cca2: String? = null,
+data class CountryFull(
+    @SerializedName("cca2")
+    val countryCode: String? = null,
 
     val independent: Boolean? = null,
     val status: String? = null,
@@ -44,7 +46,7 @@ data class CountryFull(
     val capitalInfo: CapitalInfoDto? = null,
     val postalCode: PostalCodeDto? = null,
 
-    val isFavourite: Boolean = false
+    var isFavourite: Boolean = false
 )
 
 data class IddDto(

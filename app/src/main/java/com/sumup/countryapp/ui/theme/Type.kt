@@ -64,4 +64,12 @@ val CountryTypography = Typography(
         letterSpacing = 0.5.sp,
         color = OnSurfaceDim,
     ),
+    headlineLarge = TextStyle(
+        fontFamily = FontFamilyNoto,
+        fontSize = 40.sp,
+        lineHeight = 44.sp,
+        color = OnSurface,
+        fontStyle = FontStyle.Normal,
+        fontWeight = FontWeight.Bold,
+    ),
 )

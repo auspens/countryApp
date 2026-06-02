@@ -1,5 +1,6 @@
 package com.sumup.countryapp.ui.theme
 
+import androidx.compose.material3.CardColors
 import androidx.compose.ui.graphics.Color
 
 // Brand primitives (static fallbacks; prefer MaterialTheme.colorScheme in composables)

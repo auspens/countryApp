@@ -1,4 +1,4 @@
-package com.sumup.countryapp.activity
+package com.sumup.countryapp.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,8 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.sumup.countryapp.R
 import com.sumup.countryapp.ui.theme.Brown
-import com.sumup.countryapp.ui.theme.countryButtonColors
-import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.HomeUiState
 
 @Composable
@@ -31,7 +29,8 @@ internal fun CountriesList(
     modifier: Modifier,
     onShowAllCountriesClick: () -> Unit = {},
     onToggleFavourite: (String)-> Unit,
-    onApplyFilter: (String)-> Unit
+    onApplyFilter: (String)-> Unit,
+    onChooseCountryClick: (String)-> Unit,
 ) {
     if (state.countries.isEmpty()) {
         ListIsEmpty(modifier, onShowAllCountriesClick)
@@ -56,11 +55,11 @@ internal fun CountriesList(
         LazyColumn() {
             items(
                 items = (state).countries,
-                key = { item -> item.hashCode() },
+                key = { item -> item.countryCode },
             ) { country ->
                 CountryItem(
-                    country = country, modifier = Modifier.Companion, clickAction = {},
-                    toggleFavorites = { onToggleFavourite(country.name?.common ?: "") }
+                    country = country, modifier = Modifier.Companion, clickAction = {onChooseCountryClick(country.countryCode)},
+                    toggleFavorites = { onToggleFavourite(country.countryCode) }
                 )
             }
         }

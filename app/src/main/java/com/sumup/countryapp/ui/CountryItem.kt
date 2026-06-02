@@ -1,11 +1,9 @@
-package com.sumup.countryapp.activity
+package com.sumup.countryapp.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -76,16 +74,7 @@ internal fun CountryItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            IconButton(
-                onClick = toggleFavorites
-            ) {
-                Icon(
-                    modifier = Modifier.Companion.padding(end = CountryDimens.starIconEndPadding),
-                    painter = if(country.isFavourite)rememberVectorPainter(Icons.Filled.Star) else painterResource(R.drawable.ic_star_outlined),
-                    contentDescription = null,
-                    tint = if (country.isFavourite)MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            FavouritesIcon(toggleFavorites, country.isFavourite)
         }
     }
 }

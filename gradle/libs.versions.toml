@@ -1,6 +1,7 @@
 [versions]
 agp = "9.2.1"
 coilCompose = "3.4.0"
+constraintlayoutCompose = "1.1.1"
 converterGson = "3.0.0"
 converterGsonVersion = "2.11.0"
 coreKtx = "1.18.0"
@@ -37,6 +38,7 @@ navigation3Ui = "1.1.2"
 [libraries]
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
 androidx-compose-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "hiltLifecycleViewmodelCompose" }

@@ -1,24 +1,14 @@
-package com.sumup.countryapp.activity
+package com.sumup.countryapp.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,7 +36,6 @@ import com.sumup.countryapp.navigation.NavigationRoot
 import com.sumup.countryapp.navigation.Saved
 import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.ui.theme.CountryDimens
-import com.sumup.countryapp.ui.theme.countryButtonColors
 import com.sumup.countryapp.ui.theme.countryTopAppBarColors
 import com.sumup.countryapp.ui.theme.topBarTitleRow
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
@@ -66,7 +55,11 @@ class MainActivity : ComponentActivity() {
                 val backStack = rememberNavBackStack(Home)
                 Scaffold(
                     topBar = {
-                        CountryTopAppBar(clickAction = {}, text = if(backStack[0]== Home) "World Atlas" else "Saved")
+                        TopBar(
+                            icon = { GlobeIcon() },
+                            clickAction = {},
+                            text = if (backStack[0] == Saved) "Saved" else "World Atlas"
+                        )
                     },
                     bottomBar = {
                         NavigationBar {
@@ -102,38 +95,43 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDirectoryScreen(viewModel: CountryDirectoryViewModel, modifier: Modifier = Modifier, onShowAllCountriesClick: () -> Unit = {}) {
+fun CountryDirectoryScreen(
+    viewModel: CountryDirectoryViewModel,
+    modifier: Modifier = Modifier,
+    onShowAllCountriesClick: () -> Unit = {},
+    onChooseCountryClick: (String) -> Unit
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     when (state) {
         is HomeUiState.Data ->
-            CountriesList(state as HomeUiState.Data, modifier, onShowAllCountriesClick, onToggleFavourite = viewModel::toggleFavorite , onApplyFilter = viewModel::applyFilter)
+            CountriesList(
+                state as HomeUiState.Data,
+                modifier,
+                onShowAllCountriesClick,
+                viewModel::toggleFavorite,
+                viewModel::applyFilter,
+                onChooseCountryClick
+            )
 
-        is HomeUiState.Loading -> Column(
-            modifier = Modifier
-                .padding(6.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.size(125.dp))
-            CircularProgressIndicator()
-            Text("Loading...")
-        }
+        is HomeUiState.Loading -> LoadingPage()
 
-        else -> ErrorScreen(
+        else -> ErrorPage(
             modifier = Modifier.padding(6.dp),
             retry = { viewModel.retryFetch() },
         )
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
+fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
     TopAppBar(
         colors = countryTopAppBarColors(),
         windowInsets = WindowInsets(
@@ -174,53 +172,11 @@ private fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
     )
 }
 
-
-@Composable
-private fun ErrorScreen(modifier: Modifier, retry: () -> Unit) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(CountryDimens.errorSpacing),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .padding(CountryDimens.contentPadding)
-            .fillMaxWidth(),
-    ) {
-        Image(
-            painter = painterResource(R.drawable.ic_error),
-            contentDescription = null,
-            modifier = Modifier.aspectRatio(1f),
-        )
-        Text(
-            text = "Something went wrong",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = "We couldn't load the country list.\n" +
-                    "Please check your connection and\n" +
-                    "try again.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Button(
-            onClick = retry,
-            modifier = Modifier.defaultMinSize(minWidth = CountryDimens.retryButtonMinWidth),
-            colors = countryButtonColors(),
-            content = {
-                Icon(Icons.Outlined.Refresh, contentDescription = null)
-                Text(
-                    text = "Retry",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            },
-        )
-    }
-}
-
-
 @Preview(showBackground = true)
 @Composable
 fun CountryItemPreview() {
     val country = CountryBasic(
+        countryCode = "DE",
         region = "Europe",
         name = NameDto(common = "Germany", official = "Federal Republic of Germany"),
         flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"),
@@ -239,7 +195,7 @@ fun CountryItemPreview() {
 @Composable
 fun ErrorScreenPreview() {
     CountryAppTheme {
-        ErrorScreen(modifier = Modifier, retry = {})
+        ErrorPage(modifier = Modifier, retry = {})
     }
 }
 

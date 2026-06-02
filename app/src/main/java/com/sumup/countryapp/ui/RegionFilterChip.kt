@@ -1,4 +1,4 @@
-package com.sumup.countryapp.activity
+package com.sumup.countryapp.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilterChip
