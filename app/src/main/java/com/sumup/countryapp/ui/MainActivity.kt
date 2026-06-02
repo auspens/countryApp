@@ -176,7 +176,7 @@ fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
 @Composable
 fun CountryItemPreview() {
     val country = CountryBasic(
-        cca2 = "DE",
+        countryCode = "DE",
         region = "Europe",
         name = NameDto(common = "Germany", official = "Federal Republic of Germany"),
         flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"),

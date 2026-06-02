@@ -55,11 +55,11 @@ internal fun CountriesList(
         LazyColumn() {
             items(
                 items = (state).countries,
-                key = { item -> item.cca2 },
+                key = { item -> item.countryCode },
             ) { country ->
                 CountryItem(
-                    country = country, modifier = Modifier.Companion, clickAction = {onChooseCountryClick(country.cca2)},
-                    toggleFavorites = { onToggleFavourite(country.cca2) }
+                    country = country, modifier = Modifier.Companion, clickAction = {onChooseCountryClick(country.countryCode)},
+                    toggleFavorites = { onToggleFavourite(country.countryCode) }
                 )
             }
         }

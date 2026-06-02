@@ -30,8 +30,8 @@ class CountryDetailsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle? ) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val cca2:String = intent.getStringExtra("cca2") ?: ""
-        viewModel.switchToCountryDetails(cca2)
+        val countryCode:String = intent.getStringExtra("countryCode") ?: ""
+        viewModel.switchToCountryDetails(countryCode)
         setContent {
             CountryAppTheme {
                 Scaffold(
@@ -41,8 +41,8 @@ class CountryDetailsActivity : ComponentActivity() {
                     }}, "World Atlas", {}) })
                 { padding ->
                    CountryDetailsScreen(viewModel, Modifier.padding(padding),
-                       { viewModel.toggleFavoriteInDetails(cca2) },
-                       retry = { viewModel.switchToCountryDetails(cca2) })
+                       { viewModel.toggleFavoriteInDetails(countryCode) },
+                       retry = { viewModel.switchToCountryDetails(countryCode) })
                 }
             }
         }

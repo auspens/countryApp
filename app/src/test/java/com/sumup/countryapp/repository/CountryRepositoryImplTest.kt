@@ -18,7 +18,7 @@
 //    @Test
 //    fun `getCountryByName returns success when api returns body`() = runBlocking {
 //        val country = CountryDTOShort(
-//            cca2 = "US",
+//            countryCode = "US",
 //            name = com.sumup.countryapp.datamodels.NameDto(common = "United States")
 //        )
 //

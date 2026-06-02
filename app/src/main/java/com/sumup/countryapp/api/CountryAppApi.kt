@@ -13,6 +13,6 @@ interface CountryAppApi{
     suspend fun getCountries(@Query("fields") fields:String): Response<List<CountryBasic>>
 
     @GET("alpha/{cca2}")
-    suspend fun getCountryByCode(@Path("cca2") cca2:String): Response<List<CountryFull>>
+    suspend fun getCountryByCode(@Path("cca2") countryCode:String): Response<List<CountryFull>>
 
 }

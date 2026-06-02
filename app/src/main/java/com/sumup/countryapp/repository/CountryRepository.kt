@@ -14,5 +14,5 @@ interface CountryRepository {
 
     suspend fun fetchCountriesAndRegions(): Result<SnapshotStateList<CountryBasic>>
 
-    suspend fun fetchCountryDetailsByCode(cca2: String): Result<CountryFull>
+    suspend fun fetchCountryDetailsByCode(countryCode: String): Result<CountryFull>
 }

@@ -44,7 +44,7 @@ class CountryDirectoryViewModel @Inject constructor(
                 response.isSuccess -> {
                     repository.countries.apply {
                         forEach {
-                            it.isFavourite = (favorites.contains(it.cca2))
+                            it.isFavourite = (favorites.contains(it.countryCode))
                         }
                     }
                     _uiState.value =
@@ -99,18 +99,18 @@ class CountryDirectoryViewModel @Inject constructor(
         }
     }
 
-    fun toggleFavorite(cca2: String) {
+    fun toggleFavorite(countryCode: String) {
         if (_uiState.value !is HomeUiState.Data) return
         viewModelScope.launch {
             val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
-            if (savedList.contains(cca2)) {
-                favouritesRepository.removeFromFavourites(cca2)
-                val index = repository.countries.indexOfFirst { it.cca2 == cca2 }
+            if (savedList.contains(countryCode)) {
+                favouritesRepository.removeFromFavourites(countryCode)
+                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
                 repository.countries[index] = repository.countries[index].copy(isFavourite = false)
                 applyFilter((_uiState.value as HomeUiState.Data).filter)
             } else {
-                favouritesRepository.addToFavourites(cca2)
-                val index = repository.countries.indexOfFirst { it.cca2 == cca2 }
+                favouritesRepository.addToFavourites(countryCode)
+                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
                 repository.countries[index] = repository.countries[index].copy(isFavourite = true)
                 applyFilter((_uiState.value as HomeUiState.Data).filter)
             }
@@ -139,16 +139,16 @@ class CountryDirectoryViewModel @Inject constructor(
         }
     }
 
-    fun switchToCountryDetails(cca2: String) {
+    fun switchToCountryDetails(countryCode: String) {
         viewModelScope.launch {
             _detailsUiState.value = DetailsUiState.Loading
-            val response = repository.fetchCountryDetailsByCode(cca2)
+            val response = repository.fetchCountryDetailsByCode(countryCode)
             when {
                 response.isSuccess -> {
                     val countryInfo = response.getOrNull()
                     if (countryInfo != null) {
                         val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
-                        if (savedList.contains(countryInfo.cca2)) {
+                        if (savedList.contains(countryInfo.countryCode)) {
                             countryInfo.isFavourite = true
                         }
                         _detailsUiState.value = DetailsUiState.Data(
@@ -168,10 +168,10 @@ class CountryDirectoryViewModel @Inject constructor(
 
     }
 
-    fun toggleFavoriteInDetails(cca2: String) {
+    fun toggleFavoriteInDetails(countryCode: String) {
         if (_detailsUiState.value !is DetailsUiState.Data) return
         viewModelScope.launch {
-            toggleFavorite(cca2)
+            toggleFavorite(countryCode)
             val currentDetails = _detailsUiState.value as DetailsUiState.Data
             _detailsUiState.value = DetailsUiState.Data(
                 currentDetails.countryInfo.copy(isFavourite = !currentDetails.countryInfo.isFavourite),

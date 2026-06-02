@@ -22,7 +22,7 @@ fun NavigationRoot(
 
 ) {
     val context = LocalContext.current
-    var cca2 = ""
+    var countryCode = ""
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
@@ -31,8 +31,8 @@ fun NavigationRoot(
                 viewModel.switchToAll()
                 CountryDirectoryScreen(
                     viewModel, modifier,
-                    onChooseCountryClick = {cca2 ->
-                        onChooseCountryClick(cca2, context)
+                    onChooseCountryClick = {countryCode ->
+                        onChooseCountryClick(countryCode, context)
                     })
             }
             entry<Saved> {
@@ -41,15 +41,15 @@ fun NavigationRoot(
                     viewModel, modifier, onShowAllCountriesClick = {
                         backStack.add(Home)
                     },
-                    onChooseCountryClick = { cca2 -> onChooseCountryClick(cca2, context) }
+                    onChooseCountryClick = { countryCode -> onChooseCountryClick(countryCode, context) }
                     )
             }
 
         }
     )
 }
-fun onChooseCountryClick(cca2: String, context: Context) {
+fun onChooseCountryClick(countryCode: String, context: Context) {
     val countryScreenIntent = Intent(context, CountryDetailsActivity::class.java)
-        .putExtra("cca2", cca2)
+        .putExtra("countryCode", countryCode)
     context.startActivity(countryScreenIntent)
 }
