@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,16 +25,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
+import com.sumup.countryapp.R
 import com.sumup.countryapp.datamodels.CoatOfArmsDto
 import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.datamodels.CurrencyDto
 import com.sumup.countryapp.datamodels.NameDto
 import com.sumup.countryapp.ui.theme.CountryAppTheme
+import com.sumup.countryapp.ui.theme.CountryDimens
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.DetailsUiState
 
@@ -123,9 +128,9 @@ fun CountryDetails(countryInfo: CountryFull, modifier: Modifier = Modifier, togg
                         )
                         {
                             Icon(
-                                imageVector = Icons.Filled.FavoriteBorder,
+                                painter = if(countryInfo.isFavourite)rememberVectorPainter(Icons.Filled.Star) else painterResource(R.drawable.ic_star_outlined),
                                 contentDescription = null,
-                                tint = if(countryInfo.isFavourite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                                tint = if(countryInfo.isFavourite) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
