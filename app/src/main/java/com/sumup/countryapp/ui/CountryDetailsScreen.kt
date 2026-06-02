@@ -2,11 +2,14 @@ package com.sumup.countryapp.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.sumup.countryapp.R
 import com.sumup.countryapp.datamodels.CoatOfArmsDto
@@ -62,8 +66,10 @@ internal fun CountryDetailsScreen(
 
         is DetailsUiState.Loading -> LoadingPage()
 
-        else -> ErrorPage(modifier = Modifier.padding(6.dp),
-            retry = retry)
+        else -> ErrorPage(
+            modifier = Modifier.padding(6.dp),
+            retry = retry
+        )
     }
 
 }
@@ -75,117 +81,140 @@ fun CountryDetails(
     modifier: Modifier = Modifier,
     toggleFavourites: () -> Unit
 ) {
-    LazyColumn(
-        modifier
-            .paint(
-                painter = rememberAsyncImagePainter(countryInfo.coatOfArms?.png),
-                contentScale = ContentScale.None,
+    val headerHeight = 220.dp
+    val headerOverlap = 60.dp
+    Box(
+        modifier = modifier.fillMaxWidth())
+    {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(headerHeight)
+                .align(Alignment.TopCenter),
+            contentAlignment = Alignment.Center
+        ) {
+            SubcomposeAsyncImage(
+                model = countryInfo.coatOfArms?.png,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit, // or Crop if you prefer consistent fill
                 alignment = Alignment.TopCenter,
-            )
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        item {
-            Spacer(modifier = Modifier.padding(140.dp))
-        }
-        item {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            ) {
-                Column() {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "COUNTRY PROFILE",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                            Text(
-                                countryInfo.name?.common ?: "",
-                                style = MaterialTheme.typography.headlineLarge,
-                                modifier = Modifier.padding(bottom = 6.dp)
-                            )
-                            Row(modifier = Modifier.padding(bottom = 6.dp)) {
-                                Icon(
-                                    Icons.Outlined.LocationOn,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    countryInfo.region ?: "Unknown",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    modifier = Modifier
-                                        .padding(start = 4.dp)
-                                        .align(Alignment.Bottom)
-                                )
-                            }
-                        }
-                        FavouritesIcon(toggleFavourites, countryInfo.isFavourite)
-                    }
+                loading = {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp), // fixed indicator size
+                        strokeWidth = 3.dp
+                    )
+                },
+                error = {
+                    Text("Image failed to load")
                 }
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Max)
-                    ) {
-                        InfoCard(
-                            title = "CAPITAL", content = countryInfo.capital?.getOrNull(0) ?: "",
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        )
-                        InfoCard(
-                            title = "POPULATION",
-                            content = if (countryInfo.population != null) String.format(
-                                "%.1f",
-                                (countryInfo.population) / 1000000f
-                            ) + "M" else "Unknown",
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 8.dp)
-                            .height(IntrinsicSize.Max)
-                    ) {
-                        InfoCard(
-                            title = "CURRENCY",
-                            content = countryInfo.currencies?.map { (string, dto) ->
-                                "${dto.name} (${dto.symbol})"
-                            }?.joinToString("/n") ?: "",
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        )
-                        InfoCard(
-                            title = "REGION", content = countryInfo.region ?: "",
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                        )
-                    }
-                }
-            }
-        }
-        item {
-            CountryDescription(
-                title = "About ${countryInfo.name?.common}",
-                content = "some description"
             )
         }
 
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(top = headerHeight - headerOverlap)
+        ) {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Column() {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "COUNTRY PROFILE",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(bottom = 6.dp)
+                                )
+                                Text(
+                                    countryInfo.name?.common ?: "",
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    modifier = Modifier.padding(bottom = 6.dp)
+                                )
+                                Row(modifier = Modifier.padding(bottom = 6.dp)) {
+                                    Icon(
+                                        Icons.Outlined.LocationOn,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        countryInfo.region ?: "Unknown",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        modifier = Modifier
+                                            .padding(start = 4.dp)
+                                            .align(Alignment.Bottom)
+                                    )
+                                }
+                            }
+                            FavouritesIcon(toggleFavourites, countryInfo.isFavourite)
+                        }
+                    }
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Max)
+                        ) {
+                            InfoCard(
+                                title = "CAPITAL",
+                                content = countryInfo.capital?.getOrNull(0) ?: "",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            )
+                            InfoCard(
+                                title = "POPULATION",
+                                content = if (countryInfo.population != null) String.format(
+                                    "%.1f",
+                                    (countryInfo.population) / 1000000f
+                                ) + "M" else "Unknown",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .height(IntrinsicSize.Max)
+                        ) {
+                            InfoCard(
+                                title = "CURRENCY",
+                                content = countryInfo.currencies?.map { (string, dto) ->
+                                    "${dto.name} (${dto.symbol})"
+                                }?.joinToString("/n") ?: "",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                            )
+                            InfoCard(
+                                title = "REGION", content = countryInfo.region ?: "",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                CountryDescription(
+                    title = "About ${countryInfo.name?.common}",
+                    content = "some description"
+                )
+            }
+        }
     }
 }
 
