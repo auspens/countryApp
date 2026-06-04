@@ -75,6 +75,7 @@ dependencies {
     testImplementation(libs.converter.gson.v2110)
     testImplementation(libs.kotlinx.coroutines.test.v181)
     testImplementation(libs.mockk)
+    testImplementation(libs.datastore.preferences.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -98,5 +99,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.retrofit.moshi.converter)
+
 
 }
