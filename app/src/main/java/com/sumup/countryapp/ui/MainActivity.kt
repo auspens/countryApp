@@ -123,7 +123,7 @@ fun CountryDirectoryScreen(
 
         else -> ErrorPage(
             modifier = Modifier.padding(6.dp),
-            retry = { viewModel.retryFetch() },
+            retry = { viewModel.fetchCountriesAndRegions() },
         )
     }
 }

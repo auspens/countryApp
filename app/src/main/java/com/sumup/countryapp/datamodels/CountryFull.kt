@@ -1,9 +1,10 @@
 package com.sumup.countryapp.datamodels
 
-import com.google.gson.annotations.SerializedName
-
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
+@JsonClass(generateAdapter = true)
 data class CountryFull(
-    @SerializedName("cca2")
+    @Json(name = "cca2")
     val countryCode: String? = null,
 
     val independent: Boolean? = null,
@@ -48,53 +49,53 @@ data class CountryFull(
 
     var isFavourite: Boolean = false
 )
-
+@JsonClass(generateAdapter = true)
 data class IddDto(
     val root: String? = null,
     val suffixes: List<String>? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class MapsDto(
     val googleMaps: String? = null,
     val openStreetMaps: String? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class CarDto(
     val signs: List<String>? = null,
     val side: String? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class NameDto(
     val common: String? = null,
     val official: String? = null,
     val nativeName: Map<String, NativeNameDto>? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class NativeNameDto(
     val official: String? = null,
     val common: String? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class CurrencyDto(
     val symbol: String? = null,
     val name: String? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class FlagsDto(
     val png: String? = null,
     val svg: String? = null,
     val alt: String? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class CoatOfArmsDto(
     val png: String? = null,
     val svg: String? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class CapitalInfoDto(
     val latlng: List<Double>? = null
 )
-
+@JsonClass(generateAdapter = true)
 data class PostalCodeDto(
     val format: String? = null,
     val regex: String? = null

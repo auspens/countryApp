@@ -8,10 +8,11 @@ import com.sumup.countryapp.datamodels.CountryFull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import com.sumup.countryapp.api.CountryAppApi
 
 
 class CountryRepositoryImpl @Inject constructor(
-    val countryAppApi: com.sumup.countryapp.api.CountryAppApi
+    val countryAppApi: CountryAppApi
 ) : CountryRepository {
     private var _countries: SnapshotStateList<CountryBasic> =
         mutableStateListOf()
@@ -25,50 +26,51 @@ class CountryRepositoryImpl @Inject constructor(
 
 
     override suspend fun fetchCountriesAndRegions(): Result<SnapshotStateList<CountryBasic>> {
-        val setOfRegions = mutableSetOf<String>()
 
-        runCatching {
+
+        return runCatching {
             withContext(Dispatchers.IO) {
                 countryAppApi.getCountries("cca2,name,flags,region")
             }
-        }.onFailure { exception -> return Result.failure(exception) }
-            .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val countryResponse = response.body()
-                    if (countryResponse != null) {
-                        _countries = countryResponse.toMutableStateList()
-                        _countries.map { country ->
-                            country.region?.let {
-                                setOfRegions.add(it)
-                            }
-                        }
-                        _regions.addAll(setOfRegions)
-                        return Result.success(_countries)
-                    } else {
-                        return Result.failure(Exception(response.errorBody().toString()))
-                    }
-                }
-            }
-
-        return Result.failure(Exception("Reached the end of runCatching"))
-    }
-
-    override suspend fun fetchCountryDetailsByCode(countryCode: String): Result<CountryFull> {
-        runCatching {
-            withContext(Dispatchers.IO) {
-                countryAppApi.getCountryByCode(countryCode)
-            }
-        }.onFailure { exception -> return Result.failure(exception) }
-            .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val countryResponse = response.body()
-                    return if (!countryResponse.isNullOrEmpty()) {
-                        Result.success(countryResponse[0])
-                    } else {
-                        Result.failure(Exception(response.errorBody().toString()))
-                    }
-                }
         }
-        return Result.failure(Exception("Reached the end of runCatching"))
+            .mapCatching { response ->
+                if (!response.isSuccessful) {
+                    throw Exception(response.errorBody()?.string() ?: "Unknown error")
+                }
+                val countriesResponse = response.body() ?: throw Exception("Response body is null")
+                saveCountriesAndRegions(countriesResponse)
+                _countries
+            }
     }
+    private fun saveCountriesAndRegions(countriesResponse: List<CountryBasic>) {
+        val setOfRegions = mutableSetOf<String>()
+        _countries = countriesResponse
+            .filter { countryBasic -> countryBasic.countryCode != null }
+            .toMutableStateList()
+        _countries.map { country ->
+            country.region?.let {
+                setOfRegions.add(it)
+            }
+        }
+        _regions.addAll(setOfRegions)
+}
+
+override suspend fun fetchCountryDetailsByCode(countryCode: String): Result<CountryFull> {
+    runCatching {
+        withContext(Dispatchers.IO) {
+            countryAppApi.getCountryByCode(countryCode)
+        }
+    }.onFailure { exception -> return Result.failure(exception) }
+        .onSuccess { response ->
+            if (response.isSuccessful) {
+                val countryResponse = response.body()
+                return if (!countryResponse.isNullOrEmpty()) {
+                    Result.success(countryResponse[0])
+                } else {
+                    Result.failure(Exception(response.errorBody().toString()))
+                }
+            }
+        }
+    return Result.failure(Exception("Reached the end of runCatching"))
+}
 }

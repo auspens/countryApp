@@ -32,10 +32,10 @@ class CountryDirectoryViewModel @Inject constructor(
     val detailsUiState: StateFlow<DetailsUiState> = _detailsUiState
 
     init {
-        retryFetch()
+        fetchCountriesAndRegions()
     }
 
-    fun retryFetch() {
+    fun fetchCountriesAndRegions() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
             val response = repository.fetchCountriesAndRegions()
@@ -61,9 +61,10 @@ class CountryDirectoryViewModel @Inject constructor(
         }
     }
 
+
+    //TODO: call update uiState from a separate function
     fun applyFilter(filter: String) {
         if (_uiState.value !is HomeUiState.Data) return
-        if (filter == (_uiState.value as HomeUiState.Data).filter) return
         if (filter == "All") {
             if ((_uiState.value as HomeUiState.Data).currentScreen == CurrentScreen.Saved) {
                 switchToFavourites()
@@ -206,6 +207,5 @@ sealed interface DetailsUiState {
 sealed interface CurrentScreen {
     data object All : CurrentScreen
     data object Saved : CurrentScreen
-
     data object Details : CurrentScreen
 }
