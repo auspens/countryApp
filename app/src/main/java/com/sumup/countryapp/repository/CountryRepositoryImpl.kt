@@ -3,6 +3,7 @@ package com.sumup.countryapp.repository
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import com.sumup.countryapp.api.CountryAppApi
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.CountryFull
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +12,7 @@ import javax.inject.Inject
 
 
 class CountryRepositoryImpl @Inject constructor(
-    val countryAppApi: com.sumup.countryapp.api.CountryAppApi
+    val countryAppApi: CountryAppApi
 ) : CountryRepository {
     private var _countries: SnapshotStateList<CountryBasic> =
         mutableStateListOf()
@@ -25,33 +26,34 @@ class CountryRepositoryImpl @Inject constructor(
 
 
     override suspend fun fetchCountriesAndRegions(): Result<SnapshotStateList<CountryBasic>> {
-        val setOfRegions = mutableSetOf<String>()
-
-        runCatching {
+        return runCatching {
             withContext(Dispatchers.IO) {
                 countryAppApi.getCountries("cca2,name,flags,region")
             }
-        }.onFailure { exception -> return Result.failure(exception) }
-            .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val countryResponse = response.body()
-                    if (countryResponse != null) {
-                        _countries = countryResponse.toMutableStateList()
-                        _countries.map { country ->
-                            country.region?.let {
-                                setOfRegions.add(it)
-                            }
-                        }
-                        _regions.addAll(setOfRegions)
-                        return Result.success(_countries)
-                    } else {
-                        return Result.failure(Exception(response.errorBody().toString()))
-                    }
+        }
+            .mapCatching { response ->
+                if (!response.isSuccessful) {
+                    throw Exception(response.errorBody()?.string() ?: "Unknown error")
                 }
+                val countriesResponse = response.body() ?: throw Exception("Response body is null")
+                saveCountriesAndRegions(countriesResponse)
+                _countries
             }
-
-        return Result.failure(Exception("Reached the end of runCatching"))
     }
+
+    private fun saveCountriesAndRegions(countriesResponse: List<CountryBasic>) {
+        val setOfRegions = mutableSetOf<String>()
+        _countries = countriesResponse
+            .filter { countryBasic -> countryBasic.countryCode != null }
+            .toMutableStateList()
+        _countries.map { country ->
+            country.region?.let {
+                setOfRegions.add(it)
+            }
+        }
+        _regions.addAll(setOfRegions)
+    }
+
 
     override suspend fun fetchCountryDetailsByCode(countryCode: String): Result<CountryFull> {
         runCatching {
@@ -68,7 +70,7 @@ class CountryRepositoryImpl @Inject constructor(
                         Result.failure(Exception(response.errorBody().toString()))
                     }
                 }
-        }
+            }
         return Result.failure(Exception("Reached the end of runCatching"))
     }
 }

@@ -74,6 +74,7 @@ dependencies {
     testImplementation(libs.retrofit.v2110)
     testImplementation(libs.converter.gson.v2110)
     testImplementation(libs.kotlinx.coroutines.test.v181)
+    testImplementation(libs.mockk)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -82,10 +83,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    ksp(libs.moshi.kotlin.codegen)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.retrofit)
-    implementation(libs.converter.gson)
+    implementation(libs.moshi)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.collections.immutable)
@@ -95,4 +97,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.retrofit.moshi.converter)
+
 }

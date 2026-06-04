@@ -1,10 +1,12 @@
 package com.sumup.countryapp.datamodels
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class CountryBasic(
-    @SerializedName("cca2")
-    val countryCode: String,
+    @Json(name = "cca2")
+    val countryCode: String? = null,
     val region: String? = null,
     val name: NameDto? = null,
     val flags: FlagsDto? = null,

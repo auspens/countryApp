@@ -18,6 +18,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "favourites")
@@ -59,7 +60,7 @@ interface AppModule {
         fun provideRetrofit(httpClient: OkHttpClient): retrofit2.Retrofit {
             return retrofit2.Retrofit.Builder()
                 .baseUrl("https://restcountries.com/v3.1/")
-                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create())
                 .client(httpClient)
                 .build()
         }
