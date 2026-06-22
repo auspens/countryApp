@@ -29,11 +29,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.sumup.countryapp.R
 import com.sumup.countryapp.datamodels.CountryBasic
-import com.sumup.countryapp.datamodels.FlagsDto
-import com.sumup.countryapp.datamodels.NameDto
+import com.sumup.countryapp.datamodels.CodesDto
+import com.sumup.countryapp.datamodels.FlagDto
+import com.sumup.countryapp.datamodels.NamesDto
 import com.sumup.countryapp.navigation.Home
 import com.sumup.countryapp.navigation.NavigationRoot
 import com.sumup.countryapp.navigation.Saved
+import com.sumup.countryapp.navigation.navigateToTab
 import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.ui.theme.CountryDimens
 import com.sumup.countryapp.ui.theme.countryTopAppBarColors
@@ -58,7 +60,10 @@ class MainActivity : ComponentActivity() {
                         TopBar(
                             icon = { GlobeIcon() },
                             clickAction = {},
-                            text = if (backStack[0] == Saved) "Saved" else "World Atlas"
+                            text = when (backStack.lastOrNull()) {
+                                Saved -> "Saved"
+                                else -> "World Atlas"
+                            },
                         )
                     },
                     bottomBar = {
@@ -69,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                     selected = selected,
                                     onClick = {
                                         if (!selected) {
-                                            backStack.add(item)
+                                            navigateToTab(backStack, item, viewModel)
                                         }
                                     },
                                     icon = {
@@ -89,7 +94,8 @@ class MainActivity : ComponentActivity() {
                     NavigationRoot(
                         backStack = backStack,
                         viewModel = viewModel,
-                        modifier = Modifier.padding(padding)
+                        modifier = Modifier.padding(padding),
+                        onNavigateToHome = { navigateToTab(backStack, Home, viewModel) },
                     )
                 }
             }
@@ -104,19 +110,22 @@ class MainActivity : ComponentActivity() {
 fun CountryDirectoryScreen(
     viewModel: CountryDirectoryViewModel,
     modifier: Modifier = Modifier,
+    isSavedScreen: Boolean = false,
     onShowAllCountriesClick: () -> Unit = {},
-    onChooseCountryClick: (String) -> Unit
+    onChooseCountryClick: (String) -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     when (state) {
         is HomeUiState.Data ->
             CountriesList(
-                state as HomeUiState.Data,
-                modifier,
-                onShowAllCountriesClick,
-                viewModel::toggleFavorite,
-                viewModel::applyFilter,
-                onChooseCountryClick
+                state = state as HomeUiState.Data,
+                modifier = modifier,
+                isSavedScreen = isSavedScreen,
+                onShowAllCountriesClick = onShowAllCountriesClick,
+                onToggleFavourite = viewModel::toggleFavorite,
+                onApplyFilter = viewModel::applyFilter,
+                onChooseCountryClick = onChooseCountryClick,
+                onRetry = { viewModel.fetchCountriesAndRegions() },
             )
 
         is HomeUiState.Loading -> LoadingPage()
@@ -176,11 +185,13 @@ fun CountryTopAppBar(clickAction: () -> Unit, text: String) {
 @Composable
 fun CountryItemPreview() {
     val country = CountryBasic(
-        countryCode = "DE",
+        codes = CodesDto(alpha2 = "DE"),
+        names = NamesDto(
+            common = "Germany",
+            official = "Federal Republic of Germany",
+        ),
+        flag = FlagDto(urlPng = "https://flagcdn.com/w320/de.png"),
         region = "Europe",
-        commonName = "Germany",
-        officialName = "Federal Republic of Germany",
-        flagPng = "https://flagcdn.com/w320/de.png",
     )
     CountryAppTheme {
         CountryItem(

@@ -3,7 +3,8 @@ package com.sumup.countryapp.CountryDirectoryViewModel
 import android.content.Context
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.CountryFull
-import com.sumup.countryapp.datamodels.NameDto
+import com.sumup.countryapp.datamodels.CodesDto
+import com.sumup.countryapp.datamodels.NamesDto
 import com.sumup.countryapp.repository.CountryRepository
 import com.sumup.countryapp.repository.FavouritesRepository
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
@@ -201,7 +202,7 @@ class CountryDirectoryViewModelTests {
         // Then
         assert(viewModel.uiState.value is HomeUiState.Data)
         val dataState = (viewModel.uiState.value as HomeUiState.Data)
-        assert(dataState.countries.toList().map{it.countryCode} == mockFavourites.toList())
+        assert(dataState.countries.toList().map { it.countryCode }.toSet() == mockFavourites)
         assert(dataState.currentScreen == CurrentScreen.Saved)
     }
 
@@ -214,7 +215,9 @@ class CountryDirectoryViewModelTests {
         coEvery { repository.countries } returns mockCountries
         coEvery { repository.regions } returns mockRegions
         coEvery { favouritesRepository.getFavouriteCountries() } returns emptySet()
-        coEvery { repository.fetchCountryDetailsByCode("US") } returns Result.success(CountryFull("US"))
+        coEvery { repository.fetchCountryDetailsByCode("US") } returns Result.success(
+            CountryFull(codes = CodesDto(alpha2 = "US")),
+        )
         val viewModel = CountryDirectoryViewModel(repository, favouritesRepository, context)
 
         // When
@@ -253,10 +256,10 @@ class CountryDirectoryViewModelTests {
 
 fun getMockCountries(): List<CountryBasic> {
     return listOf(
-        CountryBasic(countryCode = "US", commonName = "United States", region = "Americas"),
-        CountryBasic(countryCode = "FR", commonName = "France", region = "Europe"),
-        CountryBasic(countryCode = "BR", commonName = "Brazil", region = "Americas"),
-        CountryBasic(countryCode = "DE", commonName = "Germany", region = "Europe"),
-        CountryBasic(countryCode = "CA", commonName = "Canada", region = "Americas"),
+        CountryBasic(names = NamesDto(common = "United States"), codes = CodesDto(alpha2 = "US"), region = "Americas"),
+        CountryBasic(names = NamesDto(common = "France"), codes = CodesDto(alpha2 = "FR"), region = "Europe"),
+        CountryBasic(names = NamesDto(common = "Brazil"), codes = CodesDto(alpha2 = "BR"), region = "Americas"),
+        CountryBasic(names = NamesDto(common = "Germany"), codes = CodesDto(alpha2 = "DE"), region = "Europe"),
+        CountryBasic(names = NamesDto(common = "Canada"), codes = CodesDto(alpha2 = "CA"), region = "Americas"),
     )
 }

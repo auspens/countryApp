@@ -103,35 +103,41 @@ class CountryDirectoryViewModel @Inject constructor(
             if (savedList.contains(countryCode)) {
                 favouritesRepository.removeFromFavourites(countryCode)
                 repository.updateFavouriteStatus(countryCode, false)
-                applyFilter((_uiState.value as HomeUiState.Data).filter)
             } else {
                 favouritesRepository.addToFavourites(countryCode)
                 repository.updateFavouriteStatus(countryCode, true)
-                applyFilter((_uiState.value as HomeUiState.Data).filter)
+            }
+            val currentState = _uiState.value as HomeUiState.Data
+            if (currentState.currentScreen == CurrentScreen.Saved) {
+                switchToFavourites()
+            } else {
+                applyFilter(currentState.filter)
             }
         }
     }
 
     fun switchToFavourites() {
         if (_uiState.value !is HomeUiState.Data) return
-        viewModelScope.launch {
-            _uiState.value = HomeUiState.Loading
-            _uiState.value = HomeUiState.Data(
-                mutableStateListOf<CountryBasic>().apply { addAll(repository.countries.filter { it.isFavourite }) },
-                repository.regions, "Favourites", currentScreen = CurrentScreen.Saved
-            )
-        }
+
+        _uiState.value = HomeUiState.Data(
+            countries = mutableStateListOf<CountryBasic>().apply {
+                addAll(repository.countries.filter { it.isFavourite })
+            },
+            regions = repository.regions,
+            filter = "Favourites",
+            currentScreen = CurrentScreen.Saved,
+        )
     }
 
     fun switchToAll() {
         if (_uiState.value !is HomeUiState.Data) return
-        viewModelScope.launch {
-            _uiState.value = HomeUiState.Loading
-            _uiState.value = HomeUiState.Data(
-                repository.countries,
-                repository.regions, "All", currentScreen = CurrentScreen.All
-            )
-        }
+
+        _uiState.value = HomeUiState.Data(
+            countries = repository.countries.toMutableStateList(),
+            regions = repository.regions,
+            filter = "All",
+            currentScreen = CurrentScreen.All,
+        )
     }
 
     fun switchToCountryDetails(countryCode: String) {

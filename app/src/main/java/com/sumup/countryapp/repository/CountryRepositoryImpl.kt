@@ -83,11 +83,13 @@ class CountryRepositoryImpl @Inject constructor(
         _countries = countriesResponse
             .filter { countryBasic -> countryBasic.countryCode != null }
             .toMutableStateList()
-        _countries.map { country ->
+        _countries.forEach { country ->
             country.region?.let {
                 setOfRegions.add(it)
             }
         }
+        _regions.clear()
+        _regions.add("All")
         _regions.addAll(setOfRegions)
     }
 
