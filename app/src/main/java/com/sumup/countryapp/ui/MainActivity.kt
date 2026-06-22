@@ -178,8 +178,9 @@ fun CountryItemPreview() {
     val country = CountryBasic(
         countryCode = "DE",
         region = "Europe",
-        name = NameDto(common = "Germany", official = "Federal Republic of Germany"),
-        flags = FlagsDto(png = "https://flagcdn.com/w320/de.png"),
+        commonName = "Germany",
+        officialName = "Federal Republic of Germany",
+        flagPng = "https://flagcdn.com/w320/de.png",
     )
     CountryAppTheme {
         CountryItem(

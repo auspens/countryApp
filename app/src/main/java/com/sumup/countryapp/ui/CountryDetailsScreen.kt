@@ -49,10 +49,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.sumup.countryapp.R
-import com.sumup.countryapp.datamodels.CoatOfArmsDto
+import com.sumup.countryapp.datamodels.CapitalDto
 import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.datamodels.CurrencyDto
-import com.sumup.countryapp.datamodels.NameDto
 import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import com.sumup.countryapp.viewmodel.DetailsUiState
@@ -290,16 +289,12 @@ fun CountryDetailsPreview() {
     CountryAppTheme() {
         CountryDetails(
             countryInfo = CountryFull(
-                name = NameDto(
-                    common = "Spain",
-                    official = "Kingdom of Spain"
-                ),
-                coatOfArms = CoatOfArmsDto(
-                    png = "https://upload.wikimedia.org/wikipedia/en/thumb/9/93/Coat_of_arms_of_Spain.svg/1200px-Coat_of_arms_of_Spain.svg.png"
-                ),
+                commonName = "Spain",
+                officialName = "Kingdom of Spain",
+                flagPng = "https://upload.wikimedia.org/wikipedia/en/thumb/9/93/Coat_of_arms_of_Spain.svg/1200px-Coat_of_arms_of_Spain.svg.png",
                 region = "Europe",
                 population = 47351567,
-                capital = listOf("Madrid"),
+                capitals = listOf(CapitalDto(name = "Madrid")),
                 currencies = mapOf(
                     "EUR" to CurrencyDto(
                         name = "Euro",

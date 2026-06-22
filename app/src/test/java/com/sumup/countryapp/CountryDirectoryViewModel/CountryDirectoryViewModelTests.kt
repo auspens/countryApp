@@ -253,10 +253,10 @@ class CountryDirectoryViewModelTests {
 
 fun getMockCountries(): List<CountryBasic> {
     return listOf(
-        CountryBasic(countryCode = "US", name = NameDto("United States"), flags = null, region = "Americas"),
-        CountryBasic(countryCode = "FR", name = NameDto("France"), flags = null, region = "Europe"),
-        CountryBasic(countryCode = "BR", name = NameDto("Brazil"), flags = null, region = "Americas"),
-        CountryBasic(countryCode = "DE", name = NameDto("Germany"), flags = null, region = "Europe"),
-        CountryBasic(countryCode = "CA", name = NameDto("Canada"), flags = null, region = "Americas"),
+        CountryBasic(countryCode = "US", commonName = "United States", region = "Americas"),
+        CountryBasic(countryCode = "FR", commonName = "France", region = "Europe"),
+        CountryBasic(countryCode = "BR", commonName = "Brazil", region = "Americas"),
+        CountryBasic(countryCode = "DE", commonName = "Germany", region = "Europe"),
+        CountryBasic(countryCode = "CA", commonName = "Canada", region = "Americas"),
     )
 }

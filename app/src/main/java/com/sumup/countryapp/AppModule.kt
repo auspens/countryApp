@@ -52,10 +52,14 @@ interface AppModule {
         @Singleton
         fun provideAuthInterceptor(): Interceptor {
             return Interceptor { chain ->
-                val request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer rc_live_c4c2b85d17ce4663b3a096318c071130")
-                    .build()
-                chain.proceed(request)
+                val requestBuilder = chain.request().newBuilder()
+                if (BuildConfig.REST_COUNTRIES_API_TOKEN.isNotBlank()) {
+                    requestBuilder.addHeader(
+                        "Authorization",
+                        "Bearer ${BuildConfig.REST_COUNTRIES_API_TOKEN}",
+                    )
+                }
+                chain.proceed(requestBuilder.build())
             }
         }
 
@@ -75,7 +79,7 @@ interface AppModule {
         @Singleton
         fun provideRetrofit(httpClient: OkHttpClient): retrofit2.Retrofit {
             return retrofit2.Retrofit.Builder()
-                .baseUrl("https://restcountries.com/")
+                .baseUrl("https://api.restcountries.com/")
                 .addConverterFactory(MoshiConverterFactory.create())
                 .client(httpClient)
                 .build()

@@ -1,6 +1,9 @@
 package com.sumup.countryapp.repository
 
 import com.sumup.countryapp.api.CountryAppApi
+import com.sumup.countryapp.datamodels.CountriesListApiResponse
+import com.sumup.countryapp.datamodels.CountriesListData
+import com.sumup.countryapp.datamodels.ResponseMeta
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -26,41 +29,74 @@ class CountryRepositoryImplTest {
 
     @Test
     fun `fetchCountriesAndRegions returns Failure when API call throws `() = runTest {
+        coEvery {
+            countryAppApi.getCountries(
+                fields = "names.common,codes.alpha_2,flag.url_png,region",
+                limit = 100,
+                offset = 0,
+            )
+        } throws Exception("Network error")
 
-        //Given
-        coEvery { countryAppApi.getCountries("cca2,name,flags,region") } throws Exception("Network error")
-
-        //When
         val result = countryRepository.fetchCountriesAndRegions()
 
-        //Then
-        coVerify { countryAppApi.getCountries("cca2,name,flags,region") }
-        assert (result.isFailure)
+        coVerify {
+            countryAppApi.getCountries(
+                fields = "names.common,codes.alpha_2,flag.url_png,region",
+                limit = 100,
+                offset = 0,
+            )
+        }
+        assert(result.isFailure)
     }
 
     @Test
     fun `fetchCountriesAndRegions returns Failure when API response body is null`() = runTest {
-        //Given
-        coEvery { countryAppApi.getCountries("cca2,name,flags,region") } returns Response.success(null)
+        coEvery {
+            countryAppApi.getCountries(
+                fields = "names.common,codes.alpha_2,flag.url_png,region",
+                limit = 100,
+                offset = 0,
+            )
+        } returns Response.success(null)
 
-        //When
         val result = countryRepository.fetchCountriesAndRegions()
 
-        //Then
-        coVerify { countryAppApi.getCountries("cca2,name,flags,region") }
-        assert (result.isFailure)
+        coVerify {
+            countryAppApi.getCountries(
+                fields = "names.common,codes.alpha_2,flag.url_png,region",
+                limit = 100,
+                offset = 0,
+            )
+        }
+        assert(result.isFailure)
     }
 
     @Test
     fun `fetchCountriesAndRegions returns Success when API response body is not null`() = runTest {
-        //Given
-        coEvery { countryAppApi.getCountries("cca2,name,flags,region") } returns Response.success(emptyList())
+        coEvery {
+            countryAppApi.getCountries(
+                fields = "names.common,codes.alpha_2,flag.url_png,region",
+                limit = 100,
+                offset = 0,
+            )
+        } returns Response.success(
+            CountriesListApiResponse(
+                data = CountriesListData(
+                    objects = emptyList(),
+                    meta = ResponseMeta(more = false),
+                ),
+            ),
+        )
 
-        //When
         val result = countryRepository.fetchCountriesAndRegions()
 
-        //Then
-        coVerify { countryAppApi.getCountries("cca2,name,flags,region") }
-        assert (result.isSuccess)
+        coVerify {
+            countryAppApi.getCountries(
+                fields = "names.common,codes.alpha_2,flag.url_png,region",
+                limit = 100,
+                offset = 0,
+            )
+        }
+        assert(result.isSuccess)
     }
 }
