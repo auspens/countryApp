@@ -1,15 +1,12 @@
 package com.sumup.countryapp.viewmodel
 
-import android.content.Intent
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.repository.CountryRepository
 import com.sumup.countryapp.repository.FavouritesRepository
-import com.sumup.countryapp.ui.CountryDetailsActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.content.Context
+import androidx.compose.runtime.toMutableStateList
 
 
 @HiltViewModel
@@ -49,11 +47,10 @@ class CountryDirectoryViewModel @Inject constructor(
                     }
                     _uiState.value =
                         HomeUiState.Data(
-                            response.getOrDefault(SnapshotStateList()),
+                            response.getOrDefault(emptyList()).toMutableStateList(),
                             repository.regions, "All", currentScreen = CurrentScreen.All
                         )
                 }
-
                 else -> {
                     _uiState.value = HomeUiState.Error
                 }
@@ -62,7 +59,6 @@ class CountryDirectoryViewModel @Inject constructor(
     }
 
 
-    //TODO: call update uiState from a separate function
     fun applyFilter(filter: String) {
         if (_uiState.value !is HomeUiState.Data) return
         if (filter == "All") {
@@ -106,13 +102,11 @@ class CountryDirectoryViewModel @Inject constructor(
             val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
             if (savedList.contains(countryCode)) {
                 favouritesRepository.removeFromFavourites(countryCode)
-                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
-                repository.countries[index] = repository.countries[index].copy(isFavourite = false)
+                repository.updateFavouriteStatus(countryCode, false)
                 applyFilter((_uiState.value as HomeUiState.Data).filter)
             } else {
                 favouritesRepository.addToFavourites(countryCode)
-                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
-                repository.countries[index] = repository.countries[index].copy(isFavourite = true)
+                repository.updateFavouriteStatus(countryCode, true)
                 applyFilter((_uiState.value as HomeUiState.Data).filter)
             }
         }
@@ -169,7 +163,7 @@ class CountryDirectoryViewModel @Inject constructor(
 
     }
 
-    fun toggleFavoriteInDetails(countryCode: String) {
+    fun toggleFavouriteInCountryDetailView(countryCode: String) {
         if (_detailsUiState.value !is DetailsUiState.Data) return
         viewModelScope.launch {
             toggleFavorite(countryCode)
@@ -185,8 +179,8 @@ class CountryDirectoryViewModel @Inject constructor(
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Data(
-        val countries: SnapshotStateList<CountryBasic>,
-        val regions: SnapshotStateList<String>,
+        val countries: List<CountryBasic>,
+        val regions: List<String>,
         val filter: String,
         val currentScreen: CurrentScreen
     ) : HomeUiState

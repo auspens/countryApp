@@ -1,7 +1,6 @@
 package com.sumup.countryapp.repository
 
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.CountryFull
@@ -14,18 +13,17 @@ import com.sumup.countryapp.api.CountryAppApi
 class CountryRepositoryImpl @Inject constructor(
     val countryAppApi: CountryAppApi
 ) : CountryRepository {
-    private var _countries: SnapshotStateList<CountryBasic> =
-        mutableStateListOf()
-    private var _regions: SnapshotStateList<String> = mutableStateListOf("All")
+    private var _countries = mutableStateListOf <CountryBasic>()
+    private var _regions = mutableStateListOf("All")
 
-    override val countries: SnapshotStateList<CountryBasic>
+    override val countries: List<CountryBasic>
         get() = _countries
 
-    override val regions: SnapshotStateList<String>
+    override val regions: List<String>
         get() = _regions
 
 
-    override suspend fun fetchCountriesAndRegions(): Result<SnapshotStateList<CountryBasic>> {
+    override suspend fun fetchCountriesAndRegions(): Result<List<CountryBasic>> {
 
 
         return runCatching {
@@ -73,4 +71,11 @@ override suspend fun fetchCountryDetailsByCode(countryCode: String): Result<Coun
         }
     return Result.failure(Exception("Reached the end of runCatching"))
 }
+
+    override fun updateFavouriteStatus(countryCode: String, isFavourite: Boolean) {
+        val index = _countries.indexOfFirst { it.countryCode == countryCode }
+        if (index != -1) {
+            _countries[index] = _countries[index].copy(isFavourite = isFavourite)
+        }
+    }
 }

@@ -15,6 +15,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -49,8 +50,23 @@ interface AppModule {
 
         @Provides
         @Singleton
-        fun provideHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+        fun provideAuthInterceptor(): Interceptor {
+            return Interceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer rc_live_c4c2b85d17ce4663b3a096318c071130")
+                    .build()
+                chain.proceed(request)
+            }
+        }
+
+        @Provides
+        @Singleton
+        fun provideHttpClient(
+            loggingInterceptor: HttpLoggingInterceptor,
+            authInterceptor: Interceptor,
+        ): OkHttpClient {
             return OkHttpClient.Builder()
+                .addInterceptor(authInterceptor)
                 .addInterceptor(loggingInterceptor)
                 .build()
         }
@@ -59,7 +75,7 @@ interface AppModule {
         @Singleton
         fun provideRetrofit(httpClient: OkHttpClient): retrofit2.Retrofit {
             return retrofit2.Retrofit.Builder()
-                .baseUrl("https://restcountries.com/v3.1/")
+                .baseUrl("https://restcountries.com/")
                 .addConverterFactory(MoshiConverterFactory.create())
                 .client(httpClient)
                 .build()
