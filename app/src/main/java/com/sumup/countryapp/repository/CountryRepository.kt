@@ -9,10 +9,12 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CountryRepository {
 
-    val countries: SnapshotStateList<CountryBasic>
-    val regions: SnapshotStateList<String>
+    val countries: List<CountryBasic>
+    val regions: List<String>
 
-    suspend fun fetchCountriesAndRegions(): Result<SnapshotStateList<CountryBasic>>
+    suspend fun fetchCountriesAndRegions(): Result<List<CountryBasic>>
 
     suspend fun fetchCountryDetailsByCode(countryCode: String): Result<CountryFull>
+
+    fun updateFavouriteStatus(countryCode: String, isFavourite: Boolean)
 }

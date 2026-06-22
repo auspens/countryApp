@@ -1,18 +1,23 @@
 package com.sumup.countryapp.api
 
-import com.sumup.countryapp.datamodels.CountryBasic
-import com.sumup.countryapp.datamodels.CountryFull
+import com.sumup.countryapp.datamodels.CountriesListApiResponse
+import com.sumup.countryapp.datamodels.CountryDetailApiResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.Response
 
-interface CountryAppApi{
+interface CountryAppApi {
 
-    @GET("all")
-    suspend fun getCountries(@Query("fields") fields:String): Response<List<CountryBasic>>
+    @GET("countries/v5")
+    suspend fun getCountries(
+        @Query("response_fields") fields: String,
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+    ): Response<CountriesListApiResponse>
 
-    @GET("alpha/{cca2}")
-    suspend fun getCountryByCode(@Path("cca2") countryCode:String): Response<List<CountryFull>>
-
+    @GET("countries/v5/codes.alpha_2/{code}")
+    suspend fun getCountryByCode(
+        @Path("code") countryCode: String,
+    ): Response<CountryDetailApiResponse>
 }

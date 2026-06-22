@@ -1,3 +1,12 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -22,6 +31,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField(
+            "String",
+            "REST_COUNTRIES_API_TOKEN",
+            "\"${localProperties.getProperty("REST_COUNTRIES_API_TOKEN", "")}\"",
+        )
     }
 
     buildTypes {
@@ -40,6 +55,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 
     testOptions {
@@ -69,6 +85,7 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.material)
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
     testImplementation(libs.mockito.core)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.retrofit.v2110)
@@ -82,10 +99,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    ksp(libs.moshi.kotlin.codegen)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.retrofit)
-    implementation(libs.converter.gson)
+    implementation(libs.moshi)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.collections.immutable)
@@ -95,4 +113,5 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.retrofit.moshi.converter)
 }

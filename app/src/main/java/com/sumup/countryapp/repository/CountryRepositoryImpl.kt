@@ -1,9 +1,11 @@
 package com.sumup.countryapp.repository
 
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import com.sumup.countryapp.api.CountryAppApi
+import com.sumup.countryapp.datamodels.CountriesListApiResponse
 import com.sumup.countryapp.datamodels.CountryBasic
+import com.sumup.countryapp.datamodels.CountryDetailApiResponse
 import com.sumup.countryapp.datamodels.CountryFull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,64 +13,104 @@ import javax.inject.Inject
 
 
 class CountryRepositoryImpl @Inject constructor(
-    val countryAppApi: com.sumup.countryapp.api.CountryAppApi
+    val countryAppApi: CountryAppApi
 ) : CountryRepository {
-    private var _countries: SnapshotStateList<CountryBasic> =
-        mutableStateListOf()
-    private var _regions: SnapshotStateList<String> = mutableStateListOf("All")
+    private var _countries = mutableStateListOf<CountryBasic>()
+    private var _regions = mutableStateListOf("All")
 
-    override val countries: SnapshotStateList<CountryBasic>
+    override val countries: List<CountryBasic>
         get() = _countries
 
-    override val regions: SnapshotStateList<String>
+    override val regions: List<String>
         get() = _regions
 
-
-    override suspend fun fetchCountriesAndRegions(): Result<SnapshotStateList<CountryBasic>> {
-        val setOfRegions = mutableSetOf<String>()
-
-        runCatching {
+    override suspend fun fetchCountriesAndRegions(): Result<List<CountryBasic>> {
+        return runCatching {
             withContext(Dispatchers.IO) {
-                countryAppApi.getCountries("cca2,name,flags,region")
+                fetchAllCountries()
             }
-        }.onFailure { exception -> return Result.failure(exception) }
-            .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val countryResponse = response.body()
-                    if (countryResponse != null) {
-                        _countries = countryResponse.toMutableStateList()
-                        _countries.map { country ->
-                            country.region?.let {
-                                setOfRegions.add(it)
-                            }
-                        }
-                        _regions.addAll(setOfRegions)
-                        return Result.success(_countries)
-                    } else {
-                        return Result.failure(Exception(response.errorBody().toString()))
-                    }
-                }
-            }
+        }.mapCatching { countriesResponse ->
+            saveCountriesAndRegions(countriesResponse)
+            _countries
+        }
+    }
 
-        return Result.failure(Exception("Reached the end of runCatching"))
+    private suspend fun fetchAllCountries(): List<CountryBasic> {
+        val allCountries = mutableListOf<CountryBasic>()
+        var offset = 0
+        var hasMore = true
+
+        while (hasMore) {
+            val response = countryAppApi.getCountries(
+                fields = LIST_RESPONSE_FIELDS,
+                limit = PAGE_LIMIT,
+                offset = offset,
+            )
+            val countriesPage = unwrapListResponse(response)
+            allCountries.addAll(countriesPage)
+            hasMore = response.body()?.data?.meta?.more == true
+            offset += PAGE_LIMIT
+        }
+
+        return allCountries
+    }
+
+    private fun unwrapListResponse(response: retrofit2.Response<CountriesListApiResponse>): List<CountryBasic> {
+        if (!response.isSuccessful) {
+            throw Exception(response.errorBody()?.string() ?: "Unknown error")
+        }
+
+        val body = response.body() ?: throw Exception("Response body is null")
+        body.errors?.firstOrNull()?.message?.let { throw Exception(it) }
+
+        return body.data?.objects ?: throw Exception("No country data")
+    }
+
+    private fun unwrapDetailResponse(response: retrofit2.Response<CountryDetailApiResponse>): CountryFull {
+        if (!response.isSuccessful) {
+            throw Exception(response.errorBody()?.string() ?: "Unknown error")
+        }
+
+        val body = response.body() ?: throw Exception("Response body is null")
+        body.errors?.firstOrNull()?.message?.let { throw Exception(it) }
+
+        return body.data?.objects?.firstOrNull()
+            ?: throw Exception("Country not found")
+    }
+
+    private fun saveCountriesAndRegions(countriesResponse: List<CountryBasic>) {
+        val setOfRegions = mutableSetOf<String>()
+        _countries = countriesResponse
+            .filter { countryBasic -> countryBasic.countryCode != null }
+            .toMutableStateList()
+        _countries.forEach { country ->
+            country.region?.let {
+                setOfRegions.add(it)
+            }
+        }
+        _regions.clear()
+        _regions.add("All")
+        _regions.addAll(setOfRegions)
     }
 
     override suspend fun fetchCountryDetailsByCode(countryCode: String): Result<CountryFull> {
-        runCatching {
+        return runCatching {
             withContext(Dispatchers.IO) {
-                countryAppApi.getCountryByCode(countryCode)
+                val response = countryAppApi.getCountryByCode(countryCode)
+                unwrapDetailResponse(response)
             }
-        }.onFailure { exception -> return Result.failure(exception) }
-            .onSuccess { response ->
-                if (response.isSuccessful) {
-                    val countryResponse = response.body()
-                    return if (!countryResponse.isNullOrEmpty()) {
-                        Result.success(countryResponse[0])
-                    } else {
-                        Result.failure(Exception(response.errorBody().toString()))
-                    }
-                }
         }
-        return Result.failure(Exception("Reached the end of runCatching"))
+    }
+
+    override fun updateFavouriteStatus(countryCode: String, isFavourite: Boolean) {
+        val index = _countries.indexOfFirst { it.countryCode == countryCode }
+        if (index != -1) {
+            _countries[index] = _countries[index].copy(isFavourite = isFavourite)
+        }
+    }
+
+    private companion object {
+        const val LIST_RESPONSE_FIELDS = "names.common,codes.alpha_2,flag.url_png,region"
+        const val PAGE_LIMIT = 100
     }
 }

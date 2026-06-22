@@ -15,10 +15,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import javax.inject.Singleton
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "favourites")
 
@@ -48,8 +50,27 @@ interface AppModule {
 
         @Provides
         @Singleton
-        fun provideHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+        fun provideAuthInterceptor(): Interceptor {
+            return Interceptor { chain ->
+                val requestBuilder = chain.request().newBuilder()
+                if (BuildConfig.REST_COUNTRIES_API_TOKEN.isNotBlank()) {
+                    requestBuilder.addHeader(
+                        "Authorization",
+                        "Bearer ${BuildConfig.REST_COUNTRIES_API_TOKEN}",
+                    )
+                }
+                chain.proceed(requestBuilder.build())
+            }
+        }
+
+        @Provides
+        @Singleton
+        fun provideHttpClient(
+            loggingInterceptor: HttpLoggingInterceptor,
+            authInterceptor: Interceptor,
+        ): OkHttpClient {
             return OkHttpClient.Builder()
+                .addInterceptor(authInterceptor)
                 .addInterceptor(loggingInterceptor)
                 .build()
         }
@@ -58,8 +79,8 @@ interface AppModule {
         @Singleton
         fun provideRetrofit(httpClient: OkHttpClient): retrofit2.Retrofit {
             return retrofit2.Retrofit.Builder()
-                .baseUrl("https://restcountries.com/v3.1/")
-                .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+                .baseUrl("https://api.restcountries.com/")
+                .addConverterFactory(MoshiConverterFactory.create())
                 .client(httpClient)
                 .build()
         }

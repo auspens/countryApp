@@ -8,7 +8,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.sumup.countryapp.ui.CountryDetailsActivity
-import com.sumup.countryapp.ui.CountryDetailsScreen
 import com.sumup.countryapp.ui.CountryDirectoryScreen
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import android.content.Context
@@ -18,36 +17,57 @@ import androidx.compose.ui.platform.LocalContext
 fun NavigationRoot(
     backStack: NavBackStack<NavKey>,
     viewModel: CountryDirectoryViewModel,
-    modifier: Modifier = Modifier
-
+    modifier: Modifier = Modifier,
+    onNavigateToHome: () -> Unit,
 ) {
     val context = LocalContext.current
-    var countryCode = ""
+
     NavDisplay(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
         entryProvider = entryProvider {
             entry<Home> {
-                viewModel.switchToAll()
                 CountryDirectoryScreen(
-                    viewModel, modifier,
-                    onChooseCountryClick = {countryCode ->
+                    viewModel = viewModel,
+                    modifier = modifier,
+                    isSavedScreen = false,
+                    onChooseCountryClick = { countryCode ->
                         onChooseCountryClick(countryCode, context)
-                    })
+                    },
+                )
             }
             entry<Saved> {
-                viewModel.switchToFavourites()
                 CountryDirectoryScreen(
-                    viewModel, modifier, onShowAllCountriesClick = {
-                        backStack.add(Home)
+                    viewModel = viewModel,
+                    modifier = modifier,
+                    isSavedScreen = true,
+                    onShowAllCountriesClick = onNavigateToHome,
+                    onChooseCountryClick = { countryCode ->
+                        onChooseCountryClick(countryCode, context)
                     },
-                    onChooseCountryClick = { countryCode -> onChooseCountryClick(countryCode, context) }
-                    )
+                )
             }
-
-        }
+        },
     )
 }
+
+fun navigateToTab(
+    backStack: NavBackStack<NavKey>,
+    destination: NavKey,
+    viewModel: CountryDirectoryViewModel,
+) {
+    while (backStack.size > 1) {
+        backStack.removeLastOrNull()
+    }
+    if (backStack.lastOrNull() != destination) {
+        backStack.add(destination)
+    }
+    when (destination) {
+        Home -> viewModel.switchToAll()
+        Saved -> viewModel.switchToFavourites()
+    }
+}
+
 fun onChooseCountryClick(countryCode: String, context: Context) {
     val countryScreenIntent = Intent(context, CountryDetailsActivity::class.java)
         .putExtra("countryCode", countryCode)

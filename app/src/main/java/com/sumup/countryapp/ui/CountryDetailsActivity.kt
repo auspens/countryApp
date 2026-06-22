@@ -9,15 +9,11 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.navigation3.runtime.rememberNavBackStack
-import com.sumup.countryapp.navigation.Home
 import com.sumup.countryapp.ui.theme.CountryAppTheme
 import com.sumup.countryapp.viewmodel.CountryDirectoryViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,7 +37,7 @@ class CountryDetailsActivity : ComponentActivity() {
                     }}, "World Atlas", {}) })
                 { padding ->
                    CountryDetailsScreen(viewModel, Modifier.padding(padding),
-                       { viewModel.toggleFavoriteInDetails(countryCode) },
+                       { viewModel.toggleFavouriteInCountryDetailView(countryCode) },
                        retry = { viewModel.switchToCountryDetails(countryCode) })
                 }
             }

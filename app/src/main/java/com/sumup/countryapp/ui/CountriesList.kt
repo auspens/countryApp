@@ -27,39 +27,46 @@ import com.sumup.countryapp.viewmodel.HomeUiState
 internal fun CountriesList(
     state: HomeUiState.Data,
     modifier: Modifier,
+    isSavedScreen: Boolean,
     onShowAllCountriesClick: () -> Unit = {},
-    onToggleFavourite: (String)-> Unit,
-    onApplyFilter: (String)-> Unit,
-    onChooseCountryClick: (String)-> Unit,
+    onToggleFavourite: (String) -> Unit,
+    onApplyFilter: (String) -> Unit,
+    onChooseCountryClick: (String) -> Unit,
+    onRetry: () -> Unit,
 ) {
     if (state.countries.isEmpty()) {
-        ListIsEmpty(modifier, onShowAllCountriesClick)
+        if (isSavedScreen) {
+            SavedListIsEmpty(modifier, onShowAllCountriesClick)
+        } else {
+            HomeListIsEmpty(modifier, onRetry)
+        }
         return
     }
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
-        LazyRow() {
+        LazyRow {
             items(
-                items = (state).regions,
-                key = { item -> item.hashCode() }
+                items = state.regions,
+                key = { item -> item },
             ) { region ->
                 RegionFilterChip(
                     region,
-                    (state).filter,
-                    { onApplyFilter(region) })
+                    state.filter,
+                    { onApplyFilter(region) },
+                )
             }
-
         }
-        LazyColumn() {
+        LazyColumn {
             items(
-                items = (state).countries,
-                key = { item -> item.countryCode },
+                items = state.countries,
+                key = { item -> item.countryCode!! },
             ) { country ->
                 CountryItem(
-                    country = country, modifier = Modifier.Companion, clickAction = {onChooseCountryClick(country.countryCode)},
-                    toggleFavorites = { onToggleFavourite(country.countryCode) }
+                    country = country,
+                    modifier = Modifier,
+                    clickAction = { onChooseCountryClick(country.countryCode!!) },
+                    toggleFavorites = { onToggleFavourite(country.countryCode!!) },
                 )
             }
         }
@@ -67,43 +74,70 @@ internal fun CountriesList(
 }
 
 @Composable
-internal fun ListIsEmpty(
+internal fun SavedListIsEmpty(
     modifier: Modifier = Modifier,
-    onShowAllCountriesClick: () -> Unit
+    onShowAllCountriesClick: () -> Unit,
 ) {
-    Column(modifier = modifier
-        .fillMaxWidth()
-        .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_star_outlined),
             contentDescription = null,
             tint = Brown,
-            modifier = Modifier.Companion.size(125.dp)
+            modifier = Modifier.size(125.dp),
         )
         Text(
             text = "No saved countries yet",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = "Start exploring the world and save\n" +
-                    "your favorite countries to see them\n" +
-                    "here.",
+                "your favorite countries to see them\n" +
+                "here.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Button(onClick = onShowAllCountriesClick,
+        Button(
+            onClick = onShowAllCountriesClick,
             content = {
                 Icon(
                     Icons.Outlined.Home,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.Companion.size(18.dp)
+                    modifier = Modifier.size(18.dp),
                 )
                 Spacer(modifier = Modifier.size(8.dp))
-                Text("Explore countries", color = MaterialTheme.colorScheme.onPrimary) },
-            )
+                Text("Explore countries", color = MaterialTheme.colorScheme.onPrimary)
+            },
+        )
+    }
+}
+
+@Composable
+internal fun HomeListIsEmpty(
+    modifier: Modifier = Modifier,
+    retry: () -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = "No countries found",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Button(onClick = retry) {
+            Text("Retry")
+        }
     }
 }

@@ -1,15 +1,12 @@
 package com.sumup.countryapp.viewmodel
 
-import android.content.Intent
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sumup.countryapp.datamodels.CountryBasic
 import com.sumup.countryapp.datamodels.CountryFull
 import com.sumup.countryapp.repository.CountryRepository
 import com.sumup.countryapp.repository.FavouritesRepository
-import com.sumup.countryapp.ui.CountryDetailsActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.content.Context
+import androidx.compose.runtime.toMutableStateList
 
 
 @HiltViewModel
@@ -32,10 +30,10 @@ class CountryDirectoryViewModel @Inject constructor(
     val detailsUiState: StateFlow<DetailsUiState> = _detailsUiState
 
     init {
-        retryFetch()
+        fetchCountriesAndRegions()
     }
 
-    fun retryFetch() {
+    fun fetchCountriesAndRegions() {
         viewModelScope.launch {
             _uiState.value = HomeUiState.Loading
             val response = repository.fetchCountriesAndRegions()
@@ -49,11 +47,10 @@ class CountryDirectoryViewModel @Inject constructor(
                     }
                     _uiState.value =
                         HomeUiState.Data(
-                            response.getOrDefault(SnapshotStateList()),
+                            response.getOrDefault(emptyList()).toMutableStateList(),
                             repository.regions, "All", currentScreen = CurrentScreen.All
                         )
                 }
-
                 else -> {
                     _uiState.value = HomeUiState.Error
                 }
@@ -61,9 +58,9 @@ class CountryDirectoryViewModel @Inject constructor(
         }
     }
 
+
     fun applyFilter(filter: String) {
         if (_uiState.value !is HomeUiState.Data) return
-        if (filter == (_uiState.value as HomeUiState.Data).filter) return
         if (filter == "All") {
             if ((_uiState.value as HomeUiState.Data).currentScreen == CurrentScreen.Saved) {
                 switchToFavourites()
@@ -105,38 +102,42 @@ class CountryDirectoryViewModel @Inject constructor(
             val savedList = favouritesRepository.getFavouriteCountries().toMutableSet()
             if (savedList.contains(countryCode)) {
                 favouritesRepository.removeFromFavourites(countryCode)
-                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
-                repository.countries[index] = repository.countries[index].copy(isFavourite = false)
-                applyFilter((_uiState.value as HomeUiState.Data).filter)
+                repository.updateFavouriteStatus(countryCode, false)
             } else {
                 favouritesRepository.addToFavourites(countryCode)
-                val index = repository.countries.indexOfFirst { it.countryCode == countryCode }
-                repository.countries[index] = repository.countries[index].copy(isFavourite = true)
-                applyFilter((_uiState.value as HomeUiState.Data).filter)
+                repository.updateFavouriteStatus(countryCode, true)
+            }
+            val currentState = _uiState.value as HomeUiState.Data
+            if (currentState.currentScreen == CurrentScreen.Saved) {
+                switchToFavourites()
+            } else {
+                applyFilter(currentState.filter)
             }
         }
     }
 
     fun switchToFavourites() {
         if (_uiState.value !is HomeUiState.Data) return
-        viewModelScope.launch {
-            _uiState.value = HomeUiState.Loading
-            _uiState.value = HomeUiState.Data(
-                mutableStateListOf<CountryBasic>().apply { addAll(repository.countries.filter { it.isFavourite }) },
-                repository.regions, "Favourites", currentScreen = CurrentScreen.Saved
-            )
-        }
+
+        _uiState.value = HomeUiState.Data(
+            countries = mutableStateListOf<CountryBasic>().apply {
+                addAll(repository.countries.filter { it.isFavourite })
+            },
+            regions = repository.regions,
+            filter = "Favourites",
+            currentScreen = CurrentScreen.Saved,
+        )
     }
 
     fun switchToAll() {
         if (_uiState.value !is HomeUiState.Data) return
-        viewModelScope.launch {
-            _uiState.value = HomeUiState.Loading
-            _uiState.value = HomeUiState.Data(
-                repository.countries,
-                repository.regions, "All", currentScreen = CurrentScreen.All
-            )
-        }
+
+        _uiState.value = HomeUiState.Data(
+            countries = repository.countries.toMutableStateList(),
+            regions = repository.regions,
+            filter = "All",
+            currentScreen = CurrentScreen.All,
+        )
     }
 
     fun switchToCountryDetails(countryCode: String) {
@@ -168,7 +169,7 @@ class CountryDirectoryViewModel @Inject constructor(
 
     }
 
-    fun toggleFavoriteInDetails(countryCode: String) {
+    fun toggleFavouriteInCountryDetailView(countryCode: String) {
         if (_detailsUiState.value !is DetailsUiState.Data) return
         viewModelScope.launch {
             toggleFavorite(countryCode)
@@ -184,8 +185,8 @@ class CountryDirectoryViewModel @Inject constructor(
 sealed interface HomeUiState {
     data object Loading : HomeUiState
     data class Data(
-        val countries: SnapshotStateList<CountryBasic>,
-        val regions: SnapshotStateList<String>,
+        val countries: List<CountryBasic>,
+        val regions: List<String>,
         val filter: String,
         val currentScreen: CurrentScreen
     ) : HomeUiState
@@ -206,6 +207,5 @@ sealed interface DetailsUiState {
 sealed interface CurrentScreen {
     data object All : CurrentScreen
     data object Saved : CurrentScreen
-
     data object Details : CurrentScreen
 }
